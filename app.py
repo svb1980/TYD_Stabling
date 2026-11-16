@@ -2,6 +2,28 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 
+# Simple password gate
+def check_password():
+  def password_entered():
+    if st.session_state["password'] == "MArS1SpA":
+      st.session_state["password_correct"] = True
+      del st.session_state["password'] # don't store it
+    else:
+      st.session_state["password_correct"] = False
+
+  if "password_correct" not in st.session_state:
+    st.text_input("Password", type="password", on_change=password_entered, key="password")
+    return False
+  elif not st.session_state["password_correct"]:
+    st.text_input("Password", type="password", on_change=password_entered, key="password")
+    st.error("Incorrect password")
+    return False
+  else:
+    return True
+
+if not check_password():
+  st.stop()
+
 st.set_page_config(page_title="TYD Stabling", layout="wide")
 st.title("Tottenham Freightb Yard - Stabling")
 
