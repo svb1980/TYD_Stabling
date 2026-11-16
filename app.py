@@ -134,7 +134,7 @@ if action == "Stable Train":
               )
               st.success(f"Allocated {pending['train']} to {road_name}")
               # clear the pending data
-              del st.sessions_state.pending_train
+              del st.session_state.pending_train
               if "suitable_roads" in st.session_state:
                 del st.session_state.suitable_roads
               st.rerun()
