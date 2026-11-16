@@ -164,7 +164,7 @@ elif action == "Reserve Road":
       for road in roads:
         if road["road"] == selected_road:
           road["status"] = "Reserved"
-          road{"train"] = train
+          road["train"] = train
           st.session_state.movements.append(f"{datetime.now():%D-%m-%y %H:%M} - RESERVED {selected_road} FOR {train}")
           st.rerun()
   else:
