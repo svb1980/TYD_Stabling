@@ -88,7 +88,7 @@ if action == "Stable Train":
     train = st.text_input("Train ID")
     operator = st.text_input("Operator")
     train_type = st.selectbox("Type", ["Intermodal", "Grain", "Steel", "Container", "Ballast", "Infrastructure", "Locomotive", "Other"])
-    length = st.number_input("Length (m)", min_value=1, value=1200)
+    length = st.number_input("Length (m)", min_value=1, value=1)
     arrival = st.text_input("Arrival time")
     departure = st.text_input("Departure time")
     submitted = st.form_submit_button("Find suitable roads")
@@ -101,7 +101,7 @@ if action == "Stable Train":
       else:
         road_options = [f"{r['yard']} - {r['road']} ({r['capacity']}m)" for r in suitable]
         chosen = st.selectbox("Allocate to", road_options)
-        if st.button("Confirm allocation", key="confirm_alloc"):
+        if st.button("Confirm allocation"):
           road_name = chosen.split(" - ")[1].split(' (')[0]
           for road in roads:
             if road["road"] == road_name:
