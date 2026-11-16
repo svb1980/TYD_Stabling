@@ -124,7 +124,7 @@ if action == "Stable Train":
                 "status": "Occupied",
                 "train": pending["train"],
                 "operator": pending["operator"],
-                "type": pending["type'],
+                "type": pending["type"],
                 "length": pending["length"],
                 "arrival": pending["arrival"],
                 "depareture": pending["departure"]
