@@ -120,7 +120,7 @@ if action == "Stable Train":
 
 elif action == "Remove / Depart Train":
   st.subheader("Remove or Depart a Train")
-  occupied = [r for r in roads if r["status"] == "Occupied" and r["train]]
+  occupied = [r for r in roads if r["status"] == "Occupied" and r["train"]]
   if occupied:
     train_ids = [r["train"] for r in occupied]
     selected = st.selectbox("Select train", train_ids)
