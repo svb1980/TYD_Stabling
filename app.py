@@ -25,7 +25,7 @@ if not check_password():
   st.stop()
 
 st.set_page_config(page_title="TYD Stabling", layout="wide")
-st.title("Tottenham Freightb Yard - Stabling")
+st.title("Tottenham Freight Yard - Stabling")
 
 #Default roads (your original data)
 DEFAULT_ROADS=[
