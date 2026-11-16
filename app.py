@@ -101,7 +101,7 @@ if action == "Stable Train":
       else:
         road_options = [f"{r['yard']} - {r['road']} ({r['capacity']}m)" for r in suitable]
         chosen = st.selectbox("Allocate to", road_options)
-        if st.button("Confirm allocation"):
+        if st.form_submit_button("Confirm allocation"):
           road_name = chosen.split(" - ")[1].split(' (')[0]
           for road in roads:
             if road["road"] == road_name:
