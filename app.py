@@ -5,7 +5,7 @@ from datetime import datetime
 # Simple password gate
 def check_password():
   def password_entered():
-    if st.session_state["password'] == "MArS1SpA":
+    if st.session_state["password"] == "MArS1SpA":
       st.session_state["password_correct"] = True
       del st.session_state["password'] # don't store it
     else:
