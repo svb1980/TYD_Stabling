@@ -184,7 +184,7 @@ elif action == "Statistics & Reports":
   c2.metric("Occupied", occupied)
   c3.metric("Empty", empty)
   c4.metric("Booked Out", booked)
-  c5.metric("Utilisation", f{util}%")
+  c5.metric("Utilisation", f"{util}%")
 
   st.subheader("Recent Movements")
   if st.session_state.movements:
