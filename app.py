@@ -252,7 +252,7 @@ elif action == "Book Out / Return Road":
 
 elif action == "Reserve Road":
   st.subheader("Reserve a Road")
-  empty_roads = [r for r in st.session_state.roads if r.ge("status") == "Empty"]
+  empty_roads = [r for r in st.session_state.roads if r.get("status") == "Empty"]
   if not empty_roads:
     st.info("No empty roads available to reserve")
   else:
