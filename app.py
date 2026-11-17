@@ -171,35 +171,40 @@ if action == "Stable Train":
               st.rerun()
 
 elif action == "Remove / Depart Train":
-  st.subheader("Remove or Depart a Train")
-  occupied = [r for r in st.session_state.roads if r.get("status") == "Occupied" and r.get("train")]
-  
-  if occupied:
-    train_ids = [r["train"] for r in occupied]
-    selected = st.selectbox("Select a train to remove", train_ids)
+    st.subheader("Remove or Depart a Train")
     
-    if st.button("Remove / Depart", type="primary"):
-      for road in st.session_state.roads:
-        if road.get("train") == selected:
-          road.update({
-            "status": "Empty", 
-            "train": "", 
-            "operator": "", 
-            "type": "", 
-            "length": 0, 
-            "num_locomotives": 0,
-            "locomotive_number": "",
-            "num_wagons": 0,
-            "arrival": "", 
-            "departure": ""
-          })
-          st.session_state.movements.append(
-            f"{datetime.now():%d-%m-%Y %H:%M} - DEPARTED {selected} FROM {road['road']}"
-          )
-          st.session_state.action_message = f"{selected} removed from {road['road']}"
-          st.rerun()
+    occupied = [
+        r for r in st.session_state.roads 
+        if "Occupied" in str(r.get("status", "")) and r.get("train")
+    ]
+    
+    if not occupied:
+        st.info("No trains currently stabled")
     else:
-      st.info("No trains currently stabled")
+        train_ids = [r["train"] for r in occupied]
+        selected = st.selectbox("Select train to remove", train_ids)
+        
+        if st.button("Remove / Depart", type="primary"):
+            for road in st.session_state.roads:
+                if road.get("train") == selected:
+                    road.update({
+                        "status": "Empty",
+                        "train": "",
+                        "operator": "",
+                        "type": "",
+                        "length": 0,
+                        "num_locos": 0,
+                        "locomotives": "",
+                        "wagons": 0,
+                        "loaded": False,
+                        "arrival": "",
+                        "departure": ""
+                    })
+                    st.session_state.movements.append(
+                        f"{datetime.now():%Y-%m-%d %H:%M} — DEPARTED {selected} FROM {road['road']}"
+                    )
+                    st.session_state.action_message = f"{selected} removed from {road['road']}"
+                    st.rerun()
 
 elif action == "Book Out / Return Road":
   st.subheader("Book Out or Return a Road")
