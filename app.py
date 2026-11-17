@@ -93,7 +93,7 @@ if action == "Stable Train":
     train = st.text_input("Train ID")
     operator = st.text_input("Operator")
     train_type = st.selectbox("Type", ["Intermodal", "Grain", "Steel", "Container", "Ballast", "Infrastructure", "Locomotive", "Other"])
-    length = st.number_input("Length (m)", min_value=1, value=1)
+    length = st.number_input("Length (m)", min_value=1, value=1200)
     num_locomotives = st.number_input("Number of Locomotives", min_value=1, value=1)
     locomotive_number = st.text_input("Locomotive Number")
     num_wagons = st.number_input("Number of wagons", min_value=0, value=0)
@@ -111,6 +111,7 @@ if action == "Stable Train":
 
     if submitted and train:
       arrival_str = f"{arrival_date.strftime('%d-%m-%Y')} {arrival_time.strftime('%H:%M')}"
+      departure_str = f"{departure_date.strftime('%d-%m-%Y')} {departure_time.strftime('%H:%M')}"
       
       st.session_state.pending_train = {
         "train": train,
@@ -124,7 +125,7 @@ if action == "Stable Train":
         "arrival": arrival_str,
         "departure": departure_str
       }
-      suitable = [r for r in roads if r ["status"] == "Empty" and r["capacity"] >= length]
+      suitable = [r for r in st.session_state.roads if r ["status"] == "Empty" and r["capacity"] >= length]
       suitable.sort(key=lambda x: x["capacity"])
       st.session_state.suitable_roads = suitable
 
@@ -137,8 +138,8 @@ if action == "Stable Train":
       else:
         road_options = [f"{r['yard']} - {r['road']} ({r['capacity']}m)" for r in suitable]
         chosen = st.selectbox("Allocate to", road_options)
-        if st.form_submit_button("Confirm allocation"):
-          road_name = chosen.split(" - ")[1].split(' (')[0]
+        if st.button("Confirm allocation"):
+          road_name = chosen.split(" - ")[1].split(" (")[0]
           for road in st.session_state.roads:
             if road["road"] == road_name:
               road.update({
@@ -150,6 +151,7 @@ if action == "Stable Train":
                 "num_locomotives": pending["num_locomotives"],
                 "locomotive_number": pending["locomotive_number"],
                 "num_wagons": pending["num_wagons"],
+                "loaded": pending["loaded"],
                 "arrival": pending["arrival"],
                 "departure": pending["departure"]
               })
