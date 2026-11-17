@@ -95,7 +95,7 @@ for _, row in df_display.iterrows():
   html += f"<tr style='background-colour: {bg};'>"
   for col in display_cols:
     html += f"<td style='border: 1px solid #ddd; padding: 8px; '>{row[col]}</td>"
-  html =+ "</tr>"
+  html += "</tr>"
 html += "</table>"
 
 st.subheader("Current Yard")
