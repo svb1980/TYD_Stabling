@@ -96,7 +96,7 @@ if action == "Stable Train":
     length = st.number_input("Length (m)", min_value=1, value=1)
     num_locomotives = st.number_input("Number of Locomotives", min_value=1, value=1)
     locomotives = st.text_input("Locomotive number(s)")
-    num_wagons = st.text_input("Number of wagons", min_value=0, value=0)
+    num_wagons = st.number_input("Number of wagons", min_value=0, value=0)
 
     col1, col2 = st.columns(2)
     with col1:
