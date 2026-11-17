@@ -79,7 +79,7 @@ roads = st.session_state.roads
 df = pd.DataFrame(roads)
 
 # Only keep columns that actually exist
-wanted = ["road", "yard", "status", "train", "type", "operator", "num_locomotives", "locomotives", "wagons", "arrival", "departure", "length", "capacity"]
+wanted = ["road", "yard", "status", "train", "type", "operator", "num_locomotives", "locomotive_ID/s", "wagons", "arrival", "departure", "length", "capacity"]
 display_cols = [c for c in wanted if c in df.columns]
 
 st.subheader("Current Yard")
@@ -95,7 +95,7 @@ if action == "Stable Train":
     train_type = st.selectbox("Type", ["Intermodal", "Grain", "Steel", "Container", "Ballast", "Infrastructure", "Locomotive", "Other"])
     length = st.number_input("Length (m)", min_value=1, value=1)
     num_locomotives = st.number_input("Number of Locomotives", min_value=1, value=1)
-    locomotives = st.text_input("Locomotive number(s)")
+    locomotive_ID/s = st.text_input("Locomotive ID/s")
     num_wagons = st.number_input("Number of wagons", min_value=0, value=0)
 
     col1, col2 = st.columns(2)
@@ -117,7 +117,7 @@ if action == "Stable Train":
         "type": train_type,
         "length": int(length),
         "num_locomotives": int(num_locomotives),
-        "locomotives": Locomotives,
+        "locomotive_ID/s": Locomotive_ID/s,
         "num_wagons": int(num_wagons),
         "arrival": arrival_str,
         "departure": departure_str
@@ -146,7 +146,7 @@ if action == "Stable Train":
                 "type": pending["type"],
                 "length": pending["length"],
                 "num_locomotives": pending["num_locomotives"],
-                "locomotives": pending["Locomotives"],
+                "locomotive_ID/s": pending["Locomotive_ID/s"],
                 "num_wagons": pending["num_wagons"],
                 "arrival": pending["arrival"],
                 "departure": pending["departure"]
@@ -178,7 +178,7 @@ elif action == "Remove / Depart Train":
             "type": "", 
             "length": 0, 
             "num_locomotives": 0,
-            "locomotives": "",
+            "locomotive_ID/s": "",
             "wagons": 0,
             "arrival": "", 
             "departure": ""
