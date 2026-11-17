@@ -114,8 +114,8 @@ if action == "Stable Train":
         "type": train_type,
         "length": int(length),
         "num_locomotives": int(num_locos),
-        "locomotives" = Locomotives
-        "num_wagons" = int(num_wagons),
+        "locomotives": Locomotives
+        "num_wagons": int(num_wagons),
         "arrival": arrival_str,
         "departure": departure_str
       }
@@ -143,8 +143,8 @@ if action == "Stable Train":
                 "type": pending["type"],
                 "length": pending["length"],
                 "num_locomotives": pending["num_locos"],
-                "locomotives" = pending["Locomotives"],
-                "num_wagons" = pending["num_wagons"],
+                "locomotives": pending["Locomotives"],
+                "num_wagons": pending["num_wagons"],
                 "arrival": pending["arrival"],
                 "departure": pending["departure"]
               })
