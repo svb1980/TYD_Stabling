@@ -90,7 +90,7 @@ for col in display_cols:
   html += f"<th style='border: 1px solid #ddd; padding: 8px; text-align: left;'{col}</th>"
 html += "</tr>"
 
-for _, row in df_display.iterrown():
+for _, row in df_display.iterrows():
   bg = status_colour(row.get("status", ""))
   html += f"<tr style='background-colour: {bg};'>"
   for col in display_cols:
