@@ -79,7 +79,7 @@ roads = st.session_state.roads
 df = pd.DataFrame(roads)
 
 # Only keep columns that actually exist
-wanted = ["road", "yard", "status", "train", "type", "operator", "num_locos", "locomotives", "wagons", "arrival", "departure", "length", "capacity"]
+wanted = ["road", "yard", "status", "train", "type", "operator", "num_locomotives", "locomotives", "wagons", "arrival", "departure", "length", "capacity"]
 display_cols = [c for c in wanted if c in df.columns]
 
 st.subheader("Current Yard")
@@ -116,7 +116,7 @@ if action == "Stable Train":
         "operator": operator,
         "type": train_type,
         "length": int(length),
-        "num_locomotives": int(num_locos),
+        "num_locomotives": int(num_locomotives),
         "locomotives": Locomotives,
         "num_wagons": int(num_wagons),
         "arrival": arrival_str,
@@ -145,7 +145,7 @@ if action == "Stable Train":
                 "operator": pending["operator"],
                 "type": pending["type"],
                 "length": pending["length"],
-                "num_locomotives": pending["num_locos"],
+                "num_locomotives": pending["num_locomotives"],
                 "locomotives": pending["Locomotives"],
                 "num_wagons": pending["num_wagons"],
                 "arrival": pending["arrival"],
@@ -177,7 +177,7 @@ elif action == "Remove / Depart Train":
             "operator": "", 
             "type": "", 
             "length": 0, 
-            "num_locos": 0,
+            "num_locomotives": 0,
             "locomotives": "",
             "wagons": 0,
             "arrival": "", 
