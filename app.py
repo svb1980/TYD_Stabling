@@ -65,41 +65,29 @@ action = st.sidebar.selectbox(
 
 roads = st.session_state.roads
 
-#Yard table with forced colours
+# Yard table with visible status indicators
 df = pd.DataFrame(st.session_state.roads)
 
-wanted = ["road", "yard", "status", "train", "type", "operator", "num_locomotives", "locomotive_number", "num_wagons", "loaded", "arrival", "departure", "length", "capacity"]
+def add_status_icon(status):
+    status = str(status)
+    if status == "Occupied":
+        return "🔴 Occupied"
+    elif status == "Reserved":
+        return "🟡 Reserved"
+    elif status == "Booked Out":
+        return "⚪ Booked Out"
+    elif status == "Empty":
+        return "🟢 Empty"
+    return status
+
+if "status" in df.columns:
+    df["status"] = df["status"].apply(add_status_icon)
+
+wanted = ["road", "yard", "status", "train", "type", "operator", "num_locos", "locomotives", "wagons", "loaded", "arrival", "departure", "length", "capacity"]
 display_cols = [c for c in wanted if c in df.columns]
-df_display = df[display_cols].fillna("")
-
-def status_colour(status):
-  status = str(status)
-  if status == "Occupied":
-    return "#ffccc"
-  elif status == "Reserved":
-    return "#ff3cd"
-  elif status == "Booked Out":
-    return "#e9ecef"
-  elif status == "Empty":
-    return "#d4edda"
-  return "ffffff"
-
-html = "<table style='width:100%; border-collapse: collapse; font-size: 14px;'>"
-html += "<tr style='background-colour: #f0f0f0; font-weight: bold;'>"
-for col in display_cols:
-  html += f"<th style='border: 1px solid #ddd; padding: 8px; text-align: left;'{col}</th>"
-html += "</tr>"
-
-for _, row in df_display.iterrows():
-  bg = status_colour(row.get("status", ""))
-  html += f"<tr style='background-colour: {bg};'>"
-  for col in display_cols:
-    html += f"<td style='border: 1px solid #ddd; padding: 8px; '>{row[col]}</td>"
-  html += "</tr>"
-html += "</table>"
 
 st.subheader("Current Yard")
-st.markdown(html, unsafe_allow_html=True)
+st.dataframe(df[display_cols], use_container_width=True, hide_index=True)
 
 #Actions
 if action == "Stable Train":
