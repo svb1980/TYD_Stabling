@@ -483,8 +483,8 @@ if booked_out:
                     )
                     st.session_state.action_message = f"{road_to_return} returned to service"
                     st.rerun()
-else:
-    st.info("No roads currently booked out")
+            else:
+              st.info("No roads currently booked out")
 
 elif action == "Statistics & Reports":
   st.subheader("Yard Statistics")
