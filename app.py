@@ -78,7 +78,7 @@ roads = st.session_state.roads
 #Yard table with coloured status
 df = pd.DataFrame(roads)
 display_cols = ["road", "yard", "status", "train", "type", "operator", "num_locos", "locomotives", "wagons", "arrival", "departure", "length", "capacity"]
-styled = df[display_cols].style.map(style_status, subset=["status"])
+styled = df[display_cols].style.applymap(style_status, subset=["status"])
 st.subheader("Current Yard")
 st.dataframe(styled, use_container_width=True, hide_index=True)
 
