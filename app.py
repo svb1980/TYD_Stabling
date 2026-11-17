@@ -25,6 +25,8 @@ def check_password():
 if not check_password():
   st.stop()
 
+st.error("**FOR SITUATIONAL AWARENESS ONLY**\n\nNOT TO BE USED FOR SAFEWORKING OR SAFETY CRITICAL DECISION MAKING")
+
 st.set_page_config(page_title="TYD Stabling", layout="wide")
 st.title("Tottenham Freight Yard - Stabling")
 
@@ -108,7 +110,7 @@ if action == "Stable Train":
     train_type = st.selectbox("Type", ["Intermodal", "Grain", "Steel", "Container", "Ballast", "Infrastructure", "Locomotive", "Other"])
     length = st.number_input("Length (m)", min_value=1, value=1200)
     num_locomotives = st.number_input("Number of Locomotives", min_value=1, value=1)
-    locomotive_number = st.text_input("Locomotive Number")
+    locomotives = st.text_input("Locomotives")
     num_wagons = st.number_input("Number of wagons", min_value=0, value=0)
     loaded = st.checkbox("Wagons are loaded", value=True)
 
@@ -132,7 +134,7 @@ if action == "Stable Train":
         "type": train_type,
         "length": int(length),
         "num_locomotives": int(num_locomotives),
-        "locomotive_number": locomotive_number,
+        "locomotives": locomotives,
         "num_wagons": int(num_wagons),
         "loaded": loaded,
         "arrival": arrival_str,
@@ -162,7 +164,7 @@ if action == "Stable Train":
                 "type": pending["type"],
                 "length": pending["length"],
                 "num_locomotives": pending["num_locomotives"],
-                "locomotive_number": pending["locomotive_number"],
+                "locomotives": pending["locomotives"],
                 "num_wagons": pending["num_wagons"],
                 "loaded": pending["loaded"],
                 "arrival": pending["arrival"],
@@ -226,7 +228,7 @@ elif action == "Book Out / Return Road":
         road["type"] = ""
         road["length"] = 0
         road["num_locomotives"] = 0
-        road["locomotive nbumber"] = ""
+        road["locomotives"] = ""
         road["num_wagons"] = 0
         road["loaded"] = False
         road["arrival"] = ""
@@ -246,7 +248,7 @@ elif action == "Book Out / Return Road":
         road["type"] = ""
         road["length"] = 0
         road["num_locomotives"] = 0
-        road["locomotive nbumber"] = ""
+        road["locomotives"] = ""
         road["num_wagons"] = 0
         road["loaded"] = False
         road["arrival"] = ""
@@ -281,7 +283,7 @@ elif action == "Reserve Road":
             train_type = st.selectbox("Type", ["Intermodal", "Grain", "Steel", "Container", "Ballast", "Infrastructure", "Locomotive", "Other"])
             length = st.number_input("Length (m)", min_value=1, value=400)
             num_locos = st.number_input("Number of locomotives", min_value=0, value=1)
-            locomotives = st.text_input("Locomotive number(s)")
+            locomotives = st.text_input("Locomotives")
             wagons = st.number_input("Number of wagons", min_value=0, value=0)
             loaded = st.checkbox("Wagons are loaded", value=True)
             
@@ -364,23 +366,13 @@ elif action == "Maintenance Lock":
     st.subheader("Maintenance / Occupation Lock")
     st.caption("Authorised personnel only")
     
-    # Separate maintenance password
-    if "maint_authorised" not in st.session_state:
-        st.session_state.maint_authorised = False
-    
-    if not st.session_state.maint_authorised:
-        maint_pass = st.text_input("Maintenance authorisation password", type="password")
-        if st.button("Authorise"):
-            if maint_pass == "MaintSafe2026":  # change this to whatever you want
-                st.session_state.maint_authorised = True
-                st.rerun()
-            else:
-                st.error("Incorrect maintenance password")
+    maint_pass = st.text_input("Maintenance authorisation password", type="password", key="maint_pass_input")
+    if maint_pass != "MaintSafe2026":
+        st.warning("Enter the maintenance password to continue")
         st.stop()
     
-    st.success("Authorised for maintenance actions")
+    st.success("Authorised")
     
-    # --- Apply Lock ---
     available = [
         r for r in st.session_state.roads 
         if r.get("status") not in ["Maintenance", "Occupation"]
@@ -465,7 +457,7 @@ elif action == "Statistics & Reports":
   st.divider()
 
   # Length utilisatrion
-  occupied_length = sum(r["length"] for r in roads if r["status"] == "Occupied")
+  occupied_length = sum(r["length"] for r in roads if "Occupied" in str(r.get("status", "")):
   total_capacity = sum(r["capacity"] for r in roads)
   length_util = round((occupied_length / total_capacity) * 100) if total_capacity else 0
   st.metric("Length Utilisation", f"{length_util}%", f"{occupied_length}m / {total_capacity}m")
@@ -490,7 +482,8 @@ elif action == "Statistics & Reports":
   for r in roads:
     yard = r["yard"]
     if yard not in areas:
-      areas[yard] = {"occupied": 0, "total": 0}
+      if "Occupied" in str(r.get("status", "")):
+        areas[yard]["occupied"] += 1
     areas[yard]["total"] += 1
   area_df = pd.DataFrame([
     {"Yard": k, "Occupied": v["occupied"], "Total Roads": v["total"]}
@@ -514,7 +507,7 @@ elif action == "Statistics & Reports":
   st.subheader("Capacity Hotspots (80% or more)")
   hotspots = []
   for r in roads:
-    if r["status"] == "Occupied" and r["capacity"] > 0:
+    if "Occupied" in str(r.get("status", "")) and r["capacity"] > 0:
       usage = round((r["length"] / r["capacity"]) * 100)
       if usage >= 80:
         hotspots.append({"Road": r["road"], "Train": r["train"], "Usage": f"{usage}%"})
