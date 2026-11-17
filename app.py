@@ -65,30 +65,41 @@ action = st.sidebar.selectbox(
 
 roads = st.session_state.roads
 
-#Yard table with safe colour coding
+#Yard table with forced colours
 df = pd.DataFrame(st.session_state.roads)
 
 wanted = ["road", "yard", "status", "train", "type", "operator", "num_locomotives", "locomotive_number", "num_wagons", "loaded", "arrival", "departure", "length", "capacity"]
 display_cols = [c for c in wanted if c in df.columns]
+df_display = df[display_cols].fillna("")
 
-def colour_status(val):
-  if pd.isna(val):
-    return ""
-  val = str(val)
-  if val == "Occupied":
-    return "background-colour: #ffccc; colour: #990000; font-weight: bold"
-  elif val == "Reserved":
-    return "background-colour: #ff3cd; colour: #856404; font-weight: bold"
-  elif val == "Booked Out":
-    return "background-colour: #e9ecef; colour: #495057; font-weight: bold"
-  elif val == "Empty":
-    return "background-colour: #d4edda; colour: #155724; font-weight: bold"
-  return ""
+def status_colour(status):
+  status = str(status)
+  if status == "Occupied":
+    return "#ffccc"
+  elif status == "Reserved":
+    return "#ff3cd"
+  elif status == "Booked Out":
+    return "#e9ecef"
+  elif status == "Empty":
+    return "#d4edda"
+  return "ffffff"
 
-if "status" in df.columns:
-  styled = df[display_cols].style.map(colour_status, subset=["status"])
-  st.subheader("Current Yard")
-  st.dataframe(styled, use_container_width=True, hide_index=True)
+html = "<table style='width:100%; border-collapse: collapse; font-size: 14px;'>"
+html += "<tr style='background-colour: #f0f0f0; font-weight: bold;'>"
+for col in display_cols:
+  html += f"<th style='border: 1px solid #ddd; padding: 8px; text-align: left;'{col}</th>"
+html += "</tr>"
+
+for _, row in df_display.iterrown():
+  bg = status_colour(row.get("status", ""))
+  html += f"<tr style='background-colour: {bg};'>"
+  for col in display_cols:
+    html += f"<td style='border: 1px solid #ddd; padding: 8px; '>{row[col]}</td>"
+  html =+ "</tr>"
+html += "</table>"
+
+st.subheader("Current Yard")
+st.markdown(html, unsafe_allow_html=True)
 else:
   st.subheader("Current Yard")
   st.dataframe(df[display_cols], use_container_width=True, hide_index=True)
