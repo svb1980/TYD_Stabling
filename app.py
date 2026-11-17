@@ -75,12 +75,15 @@ action = st.sidebar.selectbox(
 
 roads = st.session_state.roads
 
-#Yard table with coloured status
+#Yard table
 df = pd.DataFrame(roads)
-display_cols = ["road", "yard", "status", "train", "type", "operator", "num_locos", "locomotives", "wagons", "arrival", "departure", "length", "capacity"]
-styled = df[display_cols].style.applymap(style_status, subset=["status"])
+
+# Only keep columns that actually exist
+wanted = ["road", "yard", "status", "train", "type", "operator", "num_locos", "locomotives", "wagons", "arrival", "departure", "length", "capacity"]
+display_cols = [c for c in wanted if c in df.columns]
+
 st.subheader("Current Yard")
-st.dataframe(styled, use_container_width=True, hide_index=True)
+st.dataframe(df[display_cols], use_container_width=True, hide_index=True)
 
 #Actions
 if action == "Stable Train":
