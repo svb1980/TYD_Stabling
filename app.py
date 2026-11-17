@@ -56,16 +56,6 @@ if "roads" not in st.session_state:
 if "movements" not in st.session_state:
   st.session_state.movements = []
 
-def style_status(val):
-  if val == "Occupied":
-    return "background-colour: #ffccc; colour: #990000; font-weight: bold"
-  elif val == "Reserved":
-    return "background-colour: #ff3cd; colour: #856404; font-weight: bold"
-  elif val == "Booked Out":
-    return "background-colour: #e9ecef; colour: #495057; font-weight: bold"
-  else:
-    return "background-colour: #d4edda; colour: #155724; font-weight: bold"
-
 #Sidebar
 st.sidebar.header("Actions")
 action = st.sidebar.selectbox(
@@ -75,15 +65,33 @@ action = st.sidebar.selectbox(
 
 roads = st.session_state.roads
 
-#Yard table
-df = pd.DataFrame(roads)
+#Yard table with safe colour coding
+df = pd.DataFrame(st.session_state.roads)
 
-# Only keep columns that actually exist
 wanted = ["road", "yard", "status", "train", "type", "operator", "num_locomotives", "locomotive_number", "num_wagons", "loaded", "arrival", "departure", "length", "capacity"]
 display_cols = [c for c in wanted if c in df.columns]
 
-st.subheader("Current Yard")
-st.dataframe(df[display_cols], use_container_width=True, hide_index=True)
+def colour_status(val):
+  if pd.isna(val):
+    return ""
+  val = str(val)
+  if val == "Occupied":
+    return "background-colour: #ffccc; colour: #990000; font-weight: bold"
+  elif val == "Reserved":
+    return "background-colour: #ff3cd; colour: #856404; font-weight: bold"
+  elif val == "Booked Out":
+    return "background-colour: #e9ecef; colour: #495057; font-weight: bold"
+  elif val == "Empty":
+    return "background-colour: #d4edda; colour: #155724; font-weight: bold"
+  return ""
+
+if "status" in df.columns:
+  styled = df[display_cols].style.map(colour_status, subset=["status"])
+  st.subheader("Current Yard")
+  st.dataframe(styled, use_container_width=True, hide_index=True)
+else:
+  st.subheader("Current Yard")
+  st.dataframe(df[display_cols], use_container_width=True, hide_index=True)
 
 #Actions
 if action == "Stable Train":
@@ -245,7 +253,6 @@ elif action == "Book Out / Return Road":
 elif action == "Reserve Road":
   st.subheader("Reserve a Road")
   empty_roads = [r for r in st.session_state.roads if r.ge("status") == "Empty"]
-  
   if not empty_roads:
     st.info("No empty roads available to reserve")
   else:
