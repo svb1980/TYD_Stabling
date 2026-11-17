@@ -94,7 +94,7 @@ if action == "Stable Train":
     operator = st.text_input("Operator")
     train_type = st.selectbox("Type", ["Intermodal", "Grain", "Steel", "Container", "Ballast", "Infrastructure", "Locomotive", "Other"])
     length = st.number_input("Length (m)", min_value=1, value=1)
-    num_locomotives = st.text_input("Number of Locomotives", min_value=1, value=1)
+    num_locomotives = st.text_input("Number of Locomotives", min_value=1, value=0)
     locomotives = st.text_input("Locomotive number(s)")
     num_wagons = st.text_input("Number of wagons", min_value=0, value=0)
 
