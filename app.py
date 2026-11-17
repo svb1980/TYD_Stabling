@@ -362,7 +362,23 @@ elif action == "Unreserve Road":
 
 elif action == "Maintenance Lock":
     st.subheader("Maintenance / Occupation Lock")
-    st.caption("Override for project managers and rail safety representatives")
+    st.caption("Authorised personnel only")
+    
+    # Separate maintenance password
+    if "maint_authorised" not in st.session_state:
+        st.session_state.maint_authorised = False
+    
+    if not st.session_state.maint_authorised:
+        maint_pass = st.text_input("Maintenance authorisation password", type="password")
+        if st.button("Authorise"):
+            if maint_pass == "MaintSafe2026":  # change this to whatever you want
+                st.session_state.maint_authorised = True
+                st.rerun()
+            else:
+                st.error("Incorrect maintenance password")
+        st.stop()
+    
+    st.success("Authorised for maintenance actions")
     
     # --- Apply Lock ---
     available = [
@@ -370,40 +386,30 @@ elif action == "Maintenance Lock":
         if r.get("status") not in ["Maintenance", "Occupation"]
     ]
     
-    if not available:
-        st.info("All roads are already under maintenance or occupation lock")
-    else:
+    if available:
         road_options = [f"{r['yard']} — {r['road']}" for r in available]
-        chosen = st.selectbox("Select road to lock", road_options, key="lock_road")
+        chosen = st.selectbox("Select road to lock", road_options)
         lock_type = st.radio("Lock type", ["Maintenance", "Occupation"])
         reason = st.text_input("Reason / Works description")
         locked_by = st.text_input("Locked by (name)")
         
         road_name_to_lock = chosen.split(" — ")[1] if chosen else ""
-        verify_lock = st.text_input(f"Type the road name to confirm lock: {road_name_to_lock}")
+        verify_lock = st.text_input(f"Type the road name to confirm: {road_name_to_lock}")
         
         if st.button("Apply Lock", type="primary"):
             if verify_lock.strip() != road_name_to_lock:
-                st.error("Verification failed. Road name does not match.")
+                st.error("Road name does not match")
             elif not locked_by:
-                st.error("Please enter who is applying the lock.")
+                st.error("Enter who is applying the lock")
             else:
                 for road in st.session_state.roads:
                     if road["road"] == road_name_to_lock:
                         road.update({
                             "status": lock_type,
-                            "train": "",
-                            "operator": "",
-                            "type": "",
-                            "length": 0,
-                            "num_locos": 0,
-                            "locomotives": "",
-                            "wagons": 0,
-                            "loaded": False,
-                            "arrival": "",
-                            "departure": "",
-                            "lock_reason": reason,
-                            "locked_by": locked_by
+                            "train": "", "operator": "", "type": "", "length": 0,
+                            "num_locos": 0, "locomotives": "", "wagons": 0,
+                            "loaded": False, "arrival": "", "departure": "",
+                            "lock_reason": reason, "locked_by": locked_by
                         })
                         st.session_state.movements.append(
                             f"{datetime.now():%Y-%m-%d %H:%M} — {lock_type.upper()} LOCK ON {road_name_to_lock} by {locked_by}"
@@ -415,22 +421,17 @@ elif action == "Maintenance Lock":
     
     # --- Remove Lock ---
     st.subheader("Remove Lock")
-    locked = [
-        r for r in st.session_state.roads 
-        if r.get("status") in ["Maintenance", "Occupation"]
-    ]
+    locked = [r for r in st.session_state.roads if r.get("status") in ["Maintenance", "Occupation"]]
     
-    if not locked:
-        st.info("No roads currently locked")
-    else:
+    if locked:
         locked_options = [f"{r['yard']} — {r['road']} ({r['status']})" for r in locked]
-        to_unlock = st.selectbox("Select locked road", locked_options, key="unlock_road")
+        to_unlock = st.selectbox("Select locked road", locked_options)
         road_name_to_unlock = to_unlock.split(" — ")[1].split(" (")[0] if to_unlock else ""
         verify_unlock = st.text_input(f"Type the road name to confirm unlock: {road_name_to_unlock}")
         
         if st.button("Remove Lock"):
             if verify_unlock.strip() != road_name_to_unlock:
-                st.error("Verification failed. Road name does not match.")
+                st.error("Road name does not match")
             else:
                 for road in st.session_state.roads:
                     if road["road"] == road_name_to_unlock:
@@ -442,6 +443,8 @@ elif action == "Maintenance Lock":
                         )
                         st.session_state.action_message = f"Lock removed from {road_name_to_unlock}"
                         st.rerun()
+    else:
+        st.info("No roads currently locked")
 
 elif action == "Statistics & Reports":
   st.subheader("Yard Statistics")
