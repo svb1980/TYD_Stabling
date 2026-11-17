@@ -197,22 +197,49 @@ elif action == "Remove / Depart Train":
 
 elif action == "Book Out / Return Road":
   st.subheader("Book Out or Return a Road")
-  road_names = [r["road"] for r in roads]
-  selected_road = st.selectbox("Road", road_names)
+  road_names = [r["road"] for r in st.session_state.roads]
+  selected_road = st.selectbox("Select road", road_names)
+  
   col1, col2 = st.columns(2)
-  if col1.button("Book Out"):
-    for road in roads:
+  
+  if col1.button("Book Out", type="primary"):
+    for road in st.session_state.roads:
+      if road["road"] == selected_road:
+        road["status"] = "Booked Out"
+        road["train"] = ""
+        road["operator"] = ""
+        road["type"] = ""
+        road["length"] = 0
+        road["num_locomotives"] = 0
+        road["locomotive nbumber"] = ""
+        road["num_wagons"] = 0
+        road["loaded"] = False
+        road["arrival"] = ""
+        road["departure"] = ""
+        st.session_state.movements.append(
+          f"{datetime.now():%D-%m-%y %H:%M} - BOOKED OUT {selected_road}"
+        )
+        st.success(f"{selected_road} booked out")
+        st.rerun()
+        
+  if col2.button("Return to Service"):
+    for road in st.session_state.roads:
       if road["road"] == selected_road:
         road["status"] = "Empty"
         road["train"] = ""
-        st.session_state.movements.append(f"{datetime.now():%D-%m-%y %H:%M} - BOOKED OUT {selected_road}")
-        st.rerun()
-  if col2.button("Return to Service"):
-    for road in roads:
-      if road["reoad"] == selected_road:
-        road["status"] = "Empty"
-        road["train"] = ""
-        st.session_state.movements.append(f"{datetime.now():%D-%m-%y %H:%M} - RETURNED {selected_road}")
+        road["operator"] = ""
+        road["type"] = ""
+        road["length"] = 0
+        road["num_locomotives"] = 0
+        road["locomotive nbumber"] = ""
+        road["num_wagons"] = 0
+        road["loaded"] = False
+        road["arrival"] = ""
+        road["departure"] = ""
+        st.session_state.movements.append(
+          f"{datetime.now():%D-%m-%y %H:%M} - RETURNED {selected_road} TO SERVICE"
+        )
+        st.success(f"{selected_road} returned to service")
         st.rerun()
 
 elif action == "Reserve Road":
