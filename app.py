@@ -290,7 +290,7 @@ elif action == "Statistics & Reports":
   st.subheader("Empty Roads")
   empty_roads = [{"Road": r["road"], "Yard": r["yard"], "Capacity": f"{r['capacity']}m"} for r in roads if r["status"] == "Empty"]
   if empty_roads:
-    st.dataframe(pd.DataFrame(empty_roads, hide_index=True, use_container_width=True)
+    st.dataframe(pd.DataFrame(empty_roads), hide_index=True, use_container_width=True)
   else:
     st.info("No empty roads")
 
