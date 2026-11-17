@@ -56,6 +56,11 @@ if "roads" not in st.session_state:
 if "movements" not in st.session_state:
   st.session_state.movements = []
 
+# Persistent confirmation message
+if "action_message" in st.session_state:
+  st.success(st.session_state.action_message)
+  del st.session_state.action_message
+
 #Sidebar
 st.sidebar.header("Actions")
 action = st.sidebar.selectbox(
@@ -64,11 +69,6 @@ action = st.sidebar.selectbox(
 )
 
 roads = st.session_state.roads
-
-#Show any pending confirmation message
-if "action_message" in st.session_state:
-  st.success(st.session_state.action_message)
-  del st.session_state.action_message
 
 # Yard table with visible status indicators
 df = pd.DataFrame(st.session_state.roads)
@@ -167,7 +167,7 @@ if action == "Stable Train":
               st.session_state.movements.append(
                 f"{datetime.now():%d-%m-%Y %H:%M} - ALLOCATED {pending['train']} TO {road_name}"
               )
-              st.session_state.action_message = f"Train{pending['train']} allocated to {road_name}"
+              st.session_state.action_message = f"Train {pending['train']} allocated to {road_name}"
               st.rerun()
 
 elif action == "Remove / Depart Train":
