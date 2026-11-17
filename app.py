@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import json
 from datetime import datetime
 
 # Simple password gate
@@ -76,7 +77,7 @@ roads = st.session_state.roads
 
 #Yard table with coloured status
 df = pd.DataFrame(roads)
-display_cols = ["road", "yard", "status", "train", "type", "operator", "arrival", "departure", "length", "capacity"]
+display_cols = ["road", "yard", "status", "train", "type", "operator", "num_locos", "locomotives", "wagons", "arrival", "departure", "length", "capacity"]
 styled = df[display_cols].style.map(style_status, subset=["status"])
 st.subheader("Current Yard")
 st.dataframe(styled, use_container_width=True, hide_index=True)
@@ -90,18 +91,33 @@ if action == "Stable Train":
     operator = st.text_input("Operator")
     train_type = st.selectbox("Type", ["Intermodal", "Grain", "Steel", "Container", "Ballast", "Infrastructure", "Locomotive", "Other"])
     length = st.number_input("Length (m)", min_value=1, value=1)
-    arrival = st.text_input("Arrival time")
-    departure = st.text_input("Departure time")
+    num_locomotives = st.text_input("Number of Locomotives", min_value=1, value=1)
+    locomotives = st.text_input("Locomotive number(s)")
+    num_wagons = st.text_input("Number of wagons", min_value=0, value=0)
+
+    col1, col2 = st.columns(2)
+    with col1:
+      arrival_date = st.date_input("Arrival date")
+      arrival_time = st.time_input("Arrival time")
+    with col2:
+      departure_date = st.date_input("Departure date")
+      departure_time = st.time_input("Departure time")
+    
     submitted = st.form_submit_button("Find suitable roads")
 
     if submitted and train:
+      arrival_str = f"{arrival_date.strftime('%d-%m-%Y')} {arrival_time.strftime('%H:%M')}"
+      
       st.session_state.pending_train = {
         "train": train,
         "operator": operator,
         "type": train_type,
         "length": int(length),
-        "arrival": arrival,
-        "departure": departure
+        "num_locomotives": int(num_locos),
+        "locomotives" = Locomotives
+        "num_wagons" = int(num_wagons),
+        "arrival": arrival_str,
+        "departure": departure_str
       }
       suitable = [r for r in roads if r ["status"] == "Empty" and r["capacity"] >= length]
       suitable.sort(key=lambda x: x["capacity"])
@@ -126,14 +142,16 @@ if action == "Stable Train":
                 "operator": pending["operator"],
                 "type": pending["type"],
                 "length": pending["length"],
+                "num_locomotives": pending["num_locos"],
+                "locomotives" = pending["Locomotives"],
+                "num_wagons" = pending["num_wagons"],
                 "arrival": pending["arrival"],
-                "depareture": pending["departure"]
+                "departure": pending["departure"]
               })
               st.session_state.movements.append(
-                f"{datetime.now():%D-%m-%y %H:%M} - ALLOCATE {train} TO {road_name}"
+                f"{datetime.now():%d-%m-%Y %H:%M} - ALLOCATED {pending['train'] TO {road_name}"
               )
               st.success(f"Allocated {pending['train']} to {road_name}")
-              # clear the pending data
               del st.session_state.pending_train
               if "suitable_roads" in st.session_state:
                 del st.session_state.suitable_roads
@@ -207,6 +225,76 @@ elif action == "Statistics & Reports":
   c4.metric("Booked Out", booked)
   c5.metric("Utilisation", f"{util}%")
 
+  st.divider()
+
+  # Length utilisatrion
+  occupied_length = sum(r["length"] for r in roads if r["status"] == "Occupied")
+  total_capacity = sum(r["capacity"] for r in roads)
+  length_util = round((occupied_length / total_capcity) * 100) if total_capacity else 0
+  st.metric("Length Utilisation", f"{length_util}%", f"{occupied_length}m / {total_capacity}m")
+
+  st.divider()
+
+  # Operator summary
+  st.subheader("Operator Summary")
+  operators = {}
+  for r in roads:
+    if r.get("operator"):
+      operators[r["operator"]] = operators.get(r["operator"], 0) + 1
+  if operators:
+    op_df = pd.DataFrame(list(operators.items()), columns=["Operator", "Trains"])
+    st.dataframe(op_df, hide_index=True, use_container_width=True)
+  else:
+    st.info("No operators recorded")
+
+  # Yard area summary
+  st.subheader("Yard Area Summary")
+  areas = {}
+  for r in roads:
+    yard = r["yard"]
+    if yard not in areas:
+      areas[yard] = {"occupied": 0, "total": 0}
+    areas[yard]["total"] += 1
+  area_df = pd.DataFrame([
+    {"Yard": k, "Occupied": v["occupied"], "Total Roads": v["total"]}
+    for k, v in areas.items()
+  ])
+  st.dataframe(area_df, hide_index=True, use_container_width=True)
+
+  # Train type summary
+  st.subheader("Train Type Summary")
+  types = {}
+  for r in roads:
+    if r.get("type"):
+      types[r["type"]] = types.get(r["type"], 0) + 1
+    if types:
+      type_df = pd.DataFrame(list(types.items()), columns=["Type", "Count"])
+      st.dataframe(type_df, hide_index=True, use_container_width=True)
+    else:
+      st.info("No train types recorded")
+
+  # Capacity hotspots
+  st.subheader("Capacity Hotspots (80% or more)")
+  hotspots = []
+  for r in roads:
+    if r["status"] == "Occupied" and r["capacity"] > 0:
+      usage = round((r["length"] / r["capacity"]) * 100)
+      if usage >= 80:
+        hotspots.append({"Road": r["road"], "Train": r["train"], "Usage": f"{usage}%"})
+  if hotspots:
+    st.dataframe(pd.DataFrame(hotspots), hide_index=True, use_container_width=True)
+  else:
+      st.info("No roads at or above 80% capacity")
+
+  # Empty roads
+  st.subheader("Empty Roads")
+  empty_roads = [{"Road": r["road"], "Yard": r["yard"], "Capacity": f"{r['capacity']}m"} for r in roads if r["status"] == "Empty"]
+  if empty_roads:
+    st.dataframe(pd.DataFrame(empty_roads, hide_index=True, use_container_width=True)
+  else:
+    st.info("No empty roads")
+
+  st.divider()            
   st.subheader("Recent Movements")
   if st.session_state.movements:
     for m in reversed(st.session_state.movements[-15:]):
@@ -214,6 +302,28 @@ elif action == "Statistics & Reports":
   else: 
     st.info("No movements yet")
 
+st.divider()
+st.subheader("Save / Load Yard")
+
+col1, col2 = st.columns(2)
+
+with col1:
+  yard_json = json.dumps(st.session_state.roads, indent=2)
+  st.download_button(
+    label="Download yard data",
+    data=yard_json,
+    file_name="yard_data.json",
+    mime="application/json"
+  )
+
+with col2:
+  uploaded = st.file_uploader("Upload yard data", type="json")
+  if uploaded is not None:
+    try:
+      loaded = json.load(uploaded)
+      st.session_state.roads = loaded
+      st.success("Yard data loaded")
+      st.rerun()
+    except Exception as e:
+      st.error("Could not load file")
 st.caption("Session data only - refresh resets the yard. Proper save comes next.")
-st.subheader("Statistics")
-#Your show_statistics logic goes here
