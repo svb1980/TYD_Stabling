@@ -83,7 +83,7 @@ wanted = ["road", "yard", "status", "train", "type", "operator", "num_locos", "l
 display_cols = [c for c in wanted if c in df.columns]
 
 st.subheader("Current Yard")
-st.dataframe(df[display_cols], width=stretch, hide_index=True)
+st.dataframe(df[display_cols], use_container_width=True, hide_index=True)
 
 #Actions
 if action == "Stable Train":
@@ -246,7 +246,7 @@ elif action == "Statistics & Reports":
       operators[r["operator"]] = operators.get(r["operator"], 0) + 1
   if operators:
     op_df = pd.DataFrame(list(operators.items()), columns=["Operator", "Trains"])
-    st.dataframe(op_df, hide_index=True, width=stretch)
+    st.dataframe(op_df, hide_index=True, use_container_width=True)
   else:
     st.info("No operators recorded")
 
@@ -262,7 +262,7 @@ elif action == "Statistics & Reports":
     {"Yard": k, "Occupied": v["occupied"], "Total Roads": v["total"]}
     for k, v in areas.items()
   ])
-  st.dataframe(area_df, hide_index=True, width=stretch)
+  st.dataframe(area_df, hide_index=True, use_container_width=True)
 
   # Train type summary
   st.subheader("Train Type Summary")
@@ -272,7 +272,7 @@ elif action == "Statistics & Reports":
       types[r["type"]] = types.get(r["type"], 0) + 1
     if types:
       type_df = pd.DataFrame(list(types.items()), columns=["Type", "Count"])
-      st.dataframe(type_df, hide_index=True, width=stretch)
+      st.dataframe(type_df, hide_index=True, use_container_width=True)
     else:
       st.info("No train types recorded")
 
@@ -285,7 +285,7 @@ elif action == "Statistics & Reports":
       if usage >= 80:
         hotspots.append({"Road": r["road"], "Train": r["train"], "Usage": f"{usage}%"})
   if hotspots:
-    st.dataframe(pd.DataFrame(hotspots), hide_index=True, width=stretch)
+    st.dataframe(pd.DataFrame(hotspots), hide_index=True, use_container_width=True)
   else:
       st.info("No roads at or above 80% capacity")
 
@@ -293,7 +293,7 @@ elif action == "Statistics & Reports":
   st.subheader("Empty Roads")
   empty_roads = [{"Road": r["road"], "Yard": r["yard"], "Capacity": f"{r['capacity']}m"} for r in roads if r["status"] == "Empty"]
   if empty_roads:
-    st.dataframe(pd.DataFrame(empty_roads), hide_index=True, width=stretch)
+    st.dataframe(pd.DataFrame(empty_roads), hide_index=True, use_container_width=True)
   else:
     st.info("No empty roads")
 
