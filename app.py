@@ -100,9 +100,6 @@ html += "</table>"
 
 st.subheader("Current Yard")
 st.markdown(html, unsafe_allow_html=True)
-else:
-  st.subheader("Current Yard")
-  st.dataframe(df[display_cols], use_container_width=True, hide_index=True)
 
 #Actions
 if action == "Stable Train":
