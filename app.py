@@ -149,7 +149,7 @@ if action == "Stable Train":
                 "departure": pending["departure"]
               })
               st.session_state.movements.append(
-                f"{datetime.now():%d-%m-%Y %H:%M} - ALLOCATED {pending['train'] TO {road_name}"
+                f"{datetime.now():%d-%m-%Y %H:%M} - ALLOCATED {pending['train']} TO {road_name}"
               )
               st.success(f"Allocated {pending['train']} to {road_name}")
               del st.session_state.pending_train
