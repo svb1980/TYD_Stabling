@@ -65,7 +65,7 @@ if "action_message" in st.session_state:
 st.sidebar.header("Actions")
 action = st.sidebar.selectbox(
   "What do you want to do?",
-  ["View Yard", "Stable Train", "Remove / Depart Train", "Book Out / Return Road", "Reserve Road", "Statistics & Reports"]
+  ["View Yard", "Stable Train", "Remove / Depart Train", "Book Out / Return Road", "Reserve Road", "Unreserve Road", "Maintenance Lock", "Statistics & Reports"]
 )
 
 roads = st.session_state.roads
@@ -83,6 +83,10 @@ def add_status_icon(status):
         return "⚪ Booked Out"
     elif status == "Empty":
         return "🟢 Empty"
+    elif status == "Maintenance":
+        return "🔧 Maintenance"
+    elif status == "Occupation":
+        return "🚧 Occupation"
     return status
 
 if "status" in df.columns:
@@ -318,6 +322,111 @@ elif action == "Reserve Road":
                     )
                     st.session_state.action_message = f"Road {road_name} successfully reserved for {train}"
                     st.rerun()
+
+elif action == "Unreserve Road":
+    st.subheader("Unreserve a Road")
+    
+    reserved = [
+        r for r in st.session_state.roads 
+        if "Reserved" in str(r.get("status", ""))
+    ]
+    
+    if not reserved:
+        st.info("No roads are currently reserved")
+    else:
+        road_options = [f"{r['yard']} — {r['road']} ({r.get('train', 'No train')})" for r in reserved]
+        chosen = st.selectbox("Select reserved road", road_options)
+        
+        if st.button("Unreserve", type="primary"):
+            road_name = chosen.split(" — ")[1].split(" (")[0]
+            for road in st.session_state.roads:
+                if road["road"] == road_name:
+                    road.update({
+                        "status": "Empty",
+                        "train": "",
+                        "operator": "",
+                        "type": "",
+                        "length": 0,
+                        "num_locos": 0,
+                        "locomotives": "",
+                        "wagons": 0,
+                        "loaded": False,
+                        "arrival": "",
+                        "departure": ""
+                    })
+                    st.session_state.movements.append(
+                        f"{datetime.now():%Y-%m-%d %H:%M} — UNRESERVED {road_name}"
+                    )
+                    st.session_state.action_message = f"{road_name} has been unreserved"
+                    st.rerun()
+
+elif action == "Maintenance Lock":
+    st.subheader("Maintenance / Occupation Lock")
+    st.caption("Override for project managers and rail safety representatives")
+    
+    # Roads that can be locked (not already locked)
+    available = [
+        r for r in st.session_state.roads 
+        if "Maintenance" not in str(r.get("status", "")) and "Occupation" not in str(r.get("status", ""))
+    ]
+    
+    if not available:
+        st.info("All roads are already under maintenance or occupation lock")
+    else:
+        road_options = [f"{r['yard']} — {r['road']}" for r in available]
+        chosen = st.selectbox("Select road to lock", road_options)
+        lock_type = st.radio("Lock type", ["Maintenance", "Occupation"])
+        reason = st.text_input("Reason / Works description")
+        locked_by = st.text_input("Locked by (name)")
+        
+        if st.button("Apply Lock", type="primary"):
+            road_name = chosen.split(" — ")[1]
+            for road in st.session_state.roads:
+                if road["road"] == road_name:
+                    road.update({
+                        "status": lock_type,
+                        "train": "",
+                        "operator": "",
+                        "type": "",
+                        "length": 0,
+                        "num_locos": 0,
+                        "locomotives": "",
+                        "wagons": 0,
+                        "loaded": False,
+                        "arrival": "",
+                        "departure": "",
+                        "lock_reason": reason,
+                        "locked_by": locked_by
+                    })
+                    st.session_state.movements.append(
+                        f"{datetime.now():%Y-%m-%d %H:%M} — {lock_type.upper()} LOCK ON {road_name} by {locked_by}"
+                    )
+                    st.session_state.action_message = f"{road_name} locked for {lock_type}"
+                    st.rerun()
+    
+    st.divider()
+    st.subheader("Remove Lock")
+    locked = [
+        r for r in st.session_state.roads 
+        if r.get("status") in ["Maintenance", "Occupation"]
+    ]
+    if locked:
+        locked_options = [f"{r['yard']} — {r['road']} ({r['status']})" for r in locked]
+        to_unlock = st.selectbox("Select locked road", locked_options)
+        if st.button("Remove Lock"):
+            road_name = to_unlock.split(" — ")[1].split(" (")[0]
+            for road in st.session_state.roads:
+                if road["road"] == road_name:
+                    road["status"] = "Empty"
+                    road["lock_reason"] = ""
+                    road["locked_by"] = ""
+                    st.session_state.movements.append(
+                        f"{datetime.now():%Y-%m-%d %H:%M} — LOCK REMOVED FROM {road_name}"
+                    )
+                    st.session_state.action_message = f"Lock removed from {road_name}"
+                    st.rerun()
+    else:
+        st.info("No roads currently locked")
 
 elif action == "Statistics & Reports":
   st.subheader("Yard Statistics")
