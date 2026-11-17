@@ -117,7 +117,7 @@ if action == "Stable Train":
         "type": train_type,
         "length": int(length),
         "num_locomotives": int(num_locomotives),
-        "locomotive_ID": Locomotive_ID,
+        "locomotive ID": Locomotive_ID,
         "num_wagons": int(num_wagons),
         "arrival": arrival_str,
         "departure": departure_str
