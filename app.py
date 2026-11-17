@@ -162,16 +162,31 @@ if action == "Stable Train":
 
 elif action == "Remove / Depart Train":
   st.subheader("Remove or Depart a Train")
-  occupied = [r for r in roads if r["status"] == "Occupied" and r["train"]]
+  occupied = [r for r in st.session_state.roads if r.get("status") == "Occupied" and r.get("train")]
+  
   if occupied:
     train_ids = [r["train"] for r in occupied]
-    selected = st.selectbox("Select train", train_ids)
-    if st.button("Remove / Depart"):
-      for road in roads:
-        if road["train"] == selected:
-          road.update({"status": "Empty", "train": "", "operator": "", "type": "", "length": 0, "arrival": "", "departure": ""})
-          st.session_state.movements.append(f"{datetime.now():%D-%m-%y %H:%M} - DEPARTED {selected} FROM {road['road']}")
-          st.success(f"{selected} cleared")
+    selected = st.selectbox("Select a train to remove", train_ids)
+    
+    if st.button("Remove / Depart", type="primary"):
+      for road in st.session_state.roads:
+        if road.get("train") == selected:
+          road.update({
+            "status": "Empty", 
+            "train": "", 
+            "operator": "", 
+            "type": "", 
+            "length": 0, 
+            "num_locos": 0,
+            "locomotives": "",
+            "wagons": 0,
+            "arrival": "", 
+            "departure": ""
+          })
+          st.session_state.movements.append(
+            f"{datetime.now():%d-%m-%Y %H:%M} - DEPARTED {selected} FROM {road['road']}"
+          )
+          st.success(f"{selected} removed from {road['road']}")
           st.rerun()
     else:
       st.info("No trains currently stabled")
