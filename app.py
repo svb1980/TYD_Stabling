@@ -79,7 +79,7 @@ roads = st.session_state.roads
 df = pd.DataFrame(roads)
 
 # Only keep columns that actually exist
-wanted = ["road", "yard", "status", "train", "type", "operator", "num_locomotives", "locomotive_ID", "wagons", "arrival", "departure", "length", "capacity"]
+wanted = ["road", "yard", "status", "train", "type", "operator", "num_locomotives", "locomotive_number", "num_wagons", "loaded", "arrival", "departure", "length", "capacity"]
 display_cols = [c for c in wanted if c in df.columns]
 
 st.subheader("Current Yard")
@@ -95,8 +95,9 @@ if action == "Stable Train":
     train_type = st.selectbox("Type", ["Intermodal", "Grain", "Steel", "Container", "Ballast", "Infrastructure", "Locomotive", "Other"])
     length = st.number_input("Length (m)", min_value=1, value=1)
     num_locomotives = st.number_input("Number of Locomotives", min_value=1, value=1)
-    locomotive_ID = st.text_input("Locomotive ID")
+    locomotive_number = st.text_input("Locomotive Number")
     num_wagons = st.number_input("Number of wagons", min_value=0, value=0)
+    loaded = st.checkbox("Wagons are loaded", value=True)
 
     col1, col2 = st.columns(2)
     with col1:
@@ -117,8 +118,9 @@ if action == "Stable Train":
         "type": train_type,
         "length": int(length),
         "num_locomotives": int(num_locomotives),
-        "locomotive ID": Locomotive_ID,
+        "locomotive_number": locomotive_number,
         "num_wagons": int(num_wagons),
+        "loaded": loaded,
         "arrival": arrival_str,
         "departure": departure_str
       }
@@ -146,7 +148,7 @@ if action == "Stable Train":
                 "type": pending["type"],
                 "length": pending["length"],
                 "num_locomotives": pending["num_locomotives"],
-                "locomotive_ID": pending["Locomotive_ID"],
+                "locomotive_number": pending["locomotive_number"],
                 "num_wagons": pending["num_wagons"],
                 "arrival": pending["arrival"],
                 "departure": pending["departure"]
@@ -178,8 +180,8 @@ elif action == "Remove / Depart Train":
             "type": "", 
             "length": 0, 
             "num_locomotives": 0,
-            "locomotive_ID": "",
-            "wagons": 0,
+            "locomotive_number": "",
+            "num_wagons": 0,
             "arrival": "", 
             "departure": ""
           })
@@ -213,16 +215,60 @@ elif action == "Book Out / Return Road":
 
 elif action == "Reserve Road":
   st.subheader("Reserve a Road")
-  road_names = [r["road"] for r in roads if r["status"] == "Empty"]
-  if road_names:
-    selected_road = st.selectbox("Emptyroad", road_names)
-    train = st.text_input("Reserved for train")
-    if st.button("Reserve") and train:
-      for road in roads:
-        if road["road"] == selected_road:
-          road["status"] = "Reserved"
-          road["train"] = train
-          st.session_state.movements.append(f"{datetime.now():%D-%m-%y %H:%M} - RESERVED {selected_road} FOR {train}")
+  empty_roads = [r for r in st.session_state.roads if r.ge("status") == "Empty"]
+  
+  if not empty_roads:
+    st.info("No empty roads available to reserve")
+  else:
+    with st.form("reserve_form"):
+      road_options = [f"{r['yard']} - {r['capacity']}m)" for r in empty_roads]
+      chosen = st.selectbox("Road to reserve", road_options)
+      train = st.text_input("train ID")
+      operator = st.text_input("Operator")
+      train_type = st.selectbox("Type", ["Intermodal", "Grain", "Steel", "Container", "Ballast", "Infrastructure", "Locomotive", "Other"])
+      length = st.number_input("Length (m)", min_value=0, value=1200)
+      num_locos = st.number_input("Number of locomotives", min_value=0, value=1)
+      locomotive_number = st.text_input("Locomotive number")
+      num_wagons = st.number_input("Number of wagons", min_value=0, value=0)
+      loaded = st.checkbox("Wagons are loaded", value=True)
+
+      col1, col2 = st.columns(2)
+      with col1:
+        arrival_date = st.date_input("Scheduled arrival date")
+        arrival_time = st.time_input("Scheduled arrival time")
+      with col2:
+        indefinite = st.checkbox("Departure not yet scheduled")
+        if not indefinite:
+          departure_date = st.date_input("Scheduled departure date")
+          departure_time = st.time_input("Scheduled departure time")
+        submitted = st.form_submit_button("Reserve road")
+
+    if submitted and train:
+      road_name = chosen.split(" - ")[1].split(" (")[0]
+      arrival_str = f"{arrival_date.strftime('%d-%m-%Y')} {arrival_time.strftime('%H:%M')}"
+      if indefinite:
+        departure_str = "Unscheduled"
+      else:
+        departure_str = f"{departure_date.strftime('%d-%m-%Y')} {departure_time.strftime('%H:%M')}"
+    
+      for road in st.session_state.roads:
+        if road["road"] == road_name:
+          road.update({
+            "status": "Reserved",
+            "train": train,
+            "operator": operator,
+            "type": train_type,
+            "length": int(length),
+            "num_locomotives": int(num_locomotives),
+            "num_wagons": int(num_wagons),
+            "loaded": loaded,
+            "arrival": arrival_str,
+            "departure": departure_str
+          })
+          st.session_state.movements.append(
+            f"{datetime.now():%d-%m-%Y %H:%M} - RESERVED {road_name} FOR {train}"
+          )
+          st.success(f"{road_name} reserved for {train}")
           st.rerun()
   else:
     st.info("No empty roads available")
