@@ -67,7 +67,7 @@ if "action_message" in st.session_state:
 st.sidebar.header("Actions")
 action = st.sidebar.selectbox(
   "What do you want to do?",
-  ["View Yard", "Stable Train", "Remove / Depart Train", "Book Out / Return Road", "Reserve Road", "Unreserve Road", "Maintenance Lock", "Statistics & Reports"]
+  ["View Yard", "Stable Train", "Remove / Depart Train", "Reserve Road", "Unreserve Road", "Maintenance Lock", "Statistics & Reports"]
 )
 
 roads = st.session_state.roads
@@ -94,7 +94,13 @@ def add_status_icon(status):
 if "status" in df.columns:
     df["status"] = df["status"].apply(add_status_icon)
 
-wanted = ["road", "yard", "status", "train", "type", "operator", "num_locos", "locomotives", "wagons", "loaded", "arrival", "departure", "length", "capacity"]
+# Add lock details if present
+if "lock_reason" not in df.columns:
+    df["lock_reason"] = ""
+if "locked_by" not in df.columns:
+    df["locked_by"] = ""
+
+wanted = ["road", "yard", "status", "train", "type", "operator", "num_locos", "locomotives", "wagons", "loaded", "arrival", "departure", "length", "capacity", "lock_reason", "locked_by"]
 display_cols = [c for c in wanted if c in df.columns]
 
 st.subheader("Current Yard")
@@ -140,9 +146,12 @@ if action == "Stable Train":
         "arrival": arrival_str,
         "departure": departure_str
       }
-      suitable = [r for r in st.session_state.roads if r ["status"] == "Empty" and r["capacity"] >= length]
-      suitable.sort(key=lambda x: x["capacity"])
-      st.session_state.suitable_roads = suitable
+      suitable = [
+    r for r in st.session_state.roads 
+    if r.get("status") == "Empty" 
+    and r["capacity"] >= length
+    and r.get("status") not in ["Maintenance", "Occupation", "Booked Out"]
+]
 
     if "pending_train" in st.session_state and st.session_state.pending_train:
       pending = st.session_state.pending_train
@@ -211,53 +220,6 @@ elif action == "Remove / Depart Train":
                     )
                     st.session_state.action_message = f"{selected} removed from {road['road']}"
                     st.rerun()
-
-elif action == "Book Out / Return Road":
-  st.subheader("Book Out or Return a Road")
-  road_names = [r["road"] for r in st.session_state.roads]
-  selected_road = st.selectbox("Select road", road_names)
-  
-  col1, col2 = st.columns(2)
-  
-  if col1.button("Book Out", type="primary"):
-    for road in st.session_state.roads:
-      if road["road"] == selected_road:
-        road["status"] = "Booked Out"
-        road["train"] = ""
-        road["operator"] = ""
-        road["type"] = ""
-        road["length"] = 0
-        road["num_locomotives"] = 0
-        road["locomotives"] = ""
-        road["num_wagons"] = 0
-        road["loaded"] = False
-        road["arrival"] = ""
-        road["departure"] = ""
-        st.session_state.movements.append(
-          f"{datetime.now():%D-%m-%y %H:%M} - BOOKED OUT {selected_road}"
-        )
-        st.session_state.action_message = f"{selected_road} booked out"
-        st.rerun()
-        
-  if col2.button("Return to Service"):
-    for road in st.session_state.roads:
-      if road["road"] == selected_road:
-        road["status"] = "Empty"
-        road["train"] = ""
-        road["operator"] = ""
-        road["type"] = ""
-        road["length"] = 0
-        road["num_locomotives"] = 0
-        road["locomotives"] = ""
-        road["num_wagons"] = 0
-        road["loaded"] = False
-        road["arrival"] = ""
-        road["departure"] = ""
-        st.session_state.movements.append(
-          f"{datetime.now():%D-%m-%y %H:%M} - RETURNED {selected_road} TO SERVICE"
-        )
-        st.session_state.action_message = f"{selected_road} returned to service"
-        st.rerun()
         
 elif action == "Reserve Road":
     st.subheader("Reserve a Road")
@@ -268,9 +230,10 @@ elif action == "Reserve Road":
         del st.session_state.reserve_message
     
     empty_roads = [
-        r for r in st.session_state.roads 
-        if str(r.get("status", "")).replace("🟢 ", "").strip() == "Empty"
-    ]
+    r for r in st.session_state.roads 
+    if str(r.get("status", "")).replace("🟢 ", "").strip() == "Empty"
+    and r.get("status") not in ["Maintenance", "Occupation", "Booked Out"]
+]
     
     if not empty_roads:
         st.warning("No empty roads available")
@@ -438,6 +401,91 @@ elif action == "Maintenance Lock":
     else:
         st.info("No roads currently locked")
 
+st.divider()
+st.subheader("Book Out a Road")
+
+road_names = [r["road"] for r in st.session_state.roads if r.get("status") not in ["Maintenance", "Occupation"]]
+if road_names:
+    selected_road = st.selectbox("Select road to book out", road_names, key="bookout_select")
+    bookout_reason = st.text_input("Reason for booking out")
+    bookout_by = st.text_input("Booked out by")
+    
+    verify_book = st.text_input(f"Type the road name to confirm: {selected_road}")
+    
+    if st.button("Book Out Road", type="primary"):
+        if verify_book.strip() != selected_road:
+            st.error("Road name does not match")
+        elif not bookout_by:
+            st.error("Enter who is booking the road out")
+        else:
+            for road in st.session_state.roads:
+                if road["road"] == selected_road:
+                    road.update({
+                        "status": "Booked Out",
+                        "train": "",
+                        "operator": "",
+                        "type": "",
+                        "length": 0,
+                        "num_locos": 0,
+                        "locomotives": "",
+                        "wagons": 0,
+                        "loaded": False,
+                        "arrival": "",
+                        "departure": "",
+                        "lock_reason": bookout_reason,
+                        "locked_by": bookout_by
+                    })
+                    st.session_state.movements.append(
+                        f"{datetime.now():%Y-%m-%d %H:%M} — BOOKED OUT {selected_road} by {bookout_by}"
+                    )
+                    st.session_state.action_message = f"{selected_road} booked out"
+                    st.rerun()
+else:
+    st.info("No roads available to book out")
+
+st.divider()
+st.subheader("Return Road to Service")
+
+booked_out = [r for r in st.session_state.roads if r.get("status") == "Booked Out"]
+if booked_out:
+    return_options = [f"{r['yard']} — {r['road']}" for r in booked_out]
+    to_return = st.selectbox("Select road to return", return_options, key="return_select")
+    return_by = st.text_input("Returned to service by")
+    
+    road_to_return = to_return.split(" — ")[1] if to_return else ""
+    verify_return = st.text_input(f"Type the road name to confirm: {road_to_return}")
+    
+    if st.button("Return to Service"):
+        if verify_return.strip() != road_to_return:
+            st.error("Road name does not match")
+        elif not return_by:
+            st.error("Enter who is returning the road")
+        else:
+            for road in st.session_state.roads:
+                if road["road"] == road_to_return:
+                    road.update({
+                        "status": "Empty",
+                        "train": "",
+                        "operator": "",
+                        "type": "",
+                        "length": 0,
+                        "num_locos": 0,
+                        "locomotives": "",
+                        "wagons": 0,
+                        "loaded": False,
+                        "arrival": "",
+                        "departure": "",
+                        "lock_reason": "",
+                        "locked_by": ""
+                    })
+                    st.session_state.movements.append(
+                        f"{datetime.now():%Y-%m-%d %H:%M} — RETURNED {road_to_return} TO SERVICE by {return_by}"
+                    )
+                    st.session_state.action_message = f"{road_to_return} returned to service"
+                    st.rerun()
+else:
+    st.info("No roads currently booked out")
+
 elif action == "Statistics & Reports":
   st.subheader("Yard Statistics")
   total = len(roads)
@@ -557,3 +605,19 @@ with col2:
     except Exception as e:
       st.error("Could not load file")
 st.caption("Session data only - refresh resets the yard. Proper save comes next.")
+
+st.divider()
+st.subheader("Movement Log")
+if st.session_state.movements:
+    log_text = "\n".join(st.session_state.movements)
+    st.download_button(
+        label="Download movement log",
+        data=log_text,
+        file_name="movement_log.txt",
+        mime="text/plain"
+    )
+    with st.expander("View recent movements"):
+        for m in reversed(st.session_state.movements[-20:]):
+            st.text(m)
+else:
+    st.info("No movements recorded yet")
