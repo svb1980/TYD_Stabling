@@ -65,6 +65,11 @@ action = st.sidebar.selectbox(
 
 roads = st.session_state.roads
 
+#Show any pending confirmation message
+if "action_message" in st.session_state:
+  st.success(st.session_state.action_message)
+  del st.session_state.action_message
+
 # Yard table with visible status indicators
 df = pd.DataFrame(st.session_state.roads)
 
@@ -162,10 +167,7 @@ if action == "Stable Train":
               st.session_state.movements.append(
                 f"{datetime.now():%d-%m-%Y %H:%M} - ALLOCATED {pending['train']} TO {road_name}"
               )
-              st.success(f"Allocated {pending['train']} to {road_name}")
-              del st.session_state.pending_train
-              if "suitable_roads" in st.session_state:
-                del st.session_state.suitable_roads
+              st.session_state.action_message = f"Train{pending['train']} allocated to {road_name}"
               st.rerun()
 
 elif action == "Remove / Depart Train":
@@ -194,7 +196,7 @@ elif action == "Remove / Depart Train":
           st.session_state.movements.append(
             f"{datetime.now():%d-%m-%Y %H:%M} - DEPARTED {selected} FROM {road['road']}"
           )
-          st.success(f"{selected} removed from {road['road']}")
+          st.session_state.action_message = f"{selected} removed from {road['road']}"
           st.rerun()
     else:
       st.info("No trains currently stabled")
@@ -223,7 +225,7 @@ elif action == "Book Out / Return Road":
         st.session_state.movements.append(
           f"{datetime.now():%D-%m-%y %H:%M} - BOOKED OUT {selected_road}"
         )
-        st.success(f"{selected_road} booked out")
+        st.session_state.action_message = f"{selected_road} booked out"
         st.rerun()
         
   if col2.button("Return to Service"):
@@ -243,22 +245,24 @@ elif action == "Book Out / Return Road":
         st.session_state.movements.append(
           f"{datetime.now():%D-%m-%y %H:%M} - RETURNED {selected_road} TO SERVICE"
         )
-        st.success(f"{selected_road} returned to service")
+        st.session_state.action_message = f"{selected_road} returned to service"
         st.rerun()
-
+        
 elif action == "Reserve Road":
     st.subheader("Reserve a Road")
     
-    # More flexible check for empty roads
+    # Show confirmation if we just reserved something
+    if "reserve_message" in st.session_state:
+        st.success(st.session_state.reserve_message)
+        del st.session_state.reserve_message
+    
     empty_roads = [
         r for r in st.session_state.roads 
-        if str(r.get("status", "")).strip() in ["Empty", "🟢 Empty", ""]
+        if str(r.get("status", "")).replace("🟢 ", "").strip() == "Empty"
     ]
     
     if not empty_roads:
-        st.warning("No empty roads found. Current statuses:")
-        statuses = [r.get("status") for r in st.session_state.roads]
-        st.write(statuses)  # temporary debug so we can see what's actually stored
+        st.warning("No empty roads available")
     else:
         with st.form("reserve_form"):
             road_options = [f"{r['yard']} — {r['road']} ({r['capacity']}m)" for r in empty_roads]
@@ -278,8 +282,9 @@ elif action == "Reserve Road":
                 arrival_time = st.time_input("Expected arrival time")
             with col2:
                 indefinite = st.checkbox("Departure indefinite / unknown")
-                departure_date = st.date_input("Expected departure date") if not indefinite else None
-                departure_time = st.time_input("Expected departure time") if not indefinite else None
+                if not indefinite:
+                    departure_date = st.date_input("Expected departure date")
+                    departure_time = st.time_input("Expected departure time")
             
             submitted = st.form_submit_button("Reserve road")
         
@@ -306,7 +311,7 @@ elif action == "Reserve Road":
                     st.session_state.movements.append(
                         f"{datetime.now():%Y-%m-%d %H:%M} — RESERVED {road_name} FOR {train}"
                     )
-                    st.success(f"{road_name} reserved for {train}")
+                    st.session_state.action_message = f"Road {road_name} successfully reserved for {train}"
                     st.rerun()
 
 elif action == "Statistics & Reports":
