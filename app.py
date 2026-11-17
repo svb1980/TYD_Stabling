@@ -270,8 +270,8 @@ elif action == "Reserve Road":
           )
           st.success(f"{road_name} reserved for {train}")
           st.rerun()
-  else:
-    st.info("No empty roads available")
+      else:
+        st.info("No empty roads available")
 
 elif action == "Statistics & Reports":
   st.subheader("Yard Statistics")
