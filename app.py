@@ -156,7 +156,7 @@ if action == "Stable Train":
     
     
   if any(x in status for x in ["Maintenance", "Occupation", "Booked Out"]):
-      continue
+    continue
     
   if "Empty" in status and capacity >= length:
       suitable.append(r)
