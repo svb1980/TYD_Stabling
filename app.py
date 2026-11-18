@@ -453,36 +453,36 @@ elif action == "Maintenance Lock":
       road_to_return = to_return.split(" — ")[1] if to_return else ""
       verify_return = st.text_input(f"Type the road name to confirm: {road_to_return}", key="verify_return_input")
     
-        if st.button("Return to Service"):
-            if verify_return.strip() != road_to_return:
-                st.error("Road name does not match")
-            elif not return_by:
-                st.error("Enter who is returning the road")
+    if st.button("Return to Service"):
+        if verify_return.strip() != road_to_return:
+            st.error("Road name does not match")
+        elif not return_by:
+            st.error("Enter who is returning the road")
+        else:
+            for road in st.session_state.roads:
+                if road["road"] == road_to_return:
+                    road.update({
+                        "status": "Empty",
+                        "train": "",
+                        "operator": "",
+                        "type": "",
+                        "length": 0,
+                        "num_locos": 0,
+                        "locomotives": "",
+                        "wagons": 0,
+                        "loaded": False,
+                        "arrival": "",
+                        "departure": "",
+                        "lock_reason": "",
+                        "locked_by": ""
+                    })
+                    st.session_state.movements.append(
+                        f"{datetime.now():%Y-%m-%d %H:%M} — RETURNED {road_to_return} TO SERVICE by {return_by}"
+                    )
+                    st.session_state.action_message = f"{road_to_return} returned to service"
+                    st.rerun()
             else:
-                for road in st.session_state.roads:
-                    if road["road"] == road_to_return:
-                        road.update({
-                            "status": "Empty",
-                            "train": "",
-                            "operator": "",
-                            "type": "",
-                            "length": 0,
-                            "num_locos": 0,
-                            "locomotives": "",
-                            "wagons": 0,
-                            "loaded": False,
-                            "arrival": "",
-                            "departure": "",
-                            "lock_reason": "",
-                            "locked_by": ""
-                        })
-                        st.session_state.movements.append(
-                            f"{datetime.now():%Y-%m-%d %H:%M} — RETURNED {road_to_return} TO SERVICE by {return_by}"
-                        )
-                        st.session_state.action_message = f"{road_to_return} returned to service"
-                        st.rerun()
-                else:
-                  st.info("No roads currently booked out")
+              st.info("No roads currently booked out")
 
 elif action == "Statistics & Reports":
   st.subheader("Yard Statistics")
