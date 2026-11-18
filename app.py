@@ -211,7 +211,7 @@ for r in st.session_state.roads:
               del st.session_state.pending_train
               st.rerun()
 
-  elif action == "Remove / Depart Train":
+elif action == "Remove / Depart Train":
     st.subheader("Remove or Depart a Train")
     
     occupied = [
