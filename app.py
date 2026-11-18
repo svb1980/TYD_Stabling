@@ -153,11 +153,11 @@ if action == "Stable Train":
   if any(x in status for x in ["Maintenance", "Occupation", "Booked Out"]):
       continue
 
-    if "Empty" in status and capacity >= length:
+  if "Empty" in status and capacity >= length:
         suitable.append(r)
-    elif "Occupied" in status:
+  elif "Occupied" in status:
         remaining = capacity - current_length
-    if remaining >= length:
+  if remaining >= length:
             suitable.append(r)
 
   if road["road"] == road_name:
