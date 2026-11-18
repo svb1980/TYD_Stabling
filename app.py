@@ -160,7 +160,7 @@ for r in st.session_state.roads:
         if remaining >= length:
             suitable.append(r)
 
-  if road["road"] == road_name:
+if road["road"] == road_name:
       new_length = (road.get("length", 0) or 0) + pending["length"]
   
       new_status = "Occupied"
