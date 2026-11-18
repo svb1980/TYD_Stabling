@@ -151,7 +151,7 @@ if action == "Stable Train":
     current_length = r.get("length", 0) or 0
 
   if any(x in status for x in ["Maintenance", "Occupation", "Booked Out"]):
-    continue
+      continue
 
     if "Empty" in status and capacity >= length:
         suitable.append(r)
