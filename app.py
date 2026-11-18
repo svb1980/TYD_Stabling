@@ -104,7 +104,7 @@ if action == "Stable Train":
   with st.form("stable_form"):
       train = st.text_input("Train ID")
       operator = st.text_input("Operator")
-      train_type = st.selectbox("Type", ["Intermodal", "Grain", "Steel", "Container", "Ballast", "Infrastructure", "Locomotive", "Other"])
+      train_type = st.selectbox("Type", ["Intermodal", "Grain", "Steel", "Container", "Ballast", "Infrastructure", "Locomotive", "Other"], key="stable_type")
       length = st.number_input("Length (m)", min_value=1, value=400)
       num_locos = st.number_input("Number of locomotives", min_value=0, value=1)
       locomotives = st.text_input("Locomotive number(s)")
@@ -200,7 +200,7 @@ elif action == "Remove / Depart Train":
       st.info("No trains currently stabled")
   else:
       train_ids = [r["train"] for r in occupied]
-      selected = st.selectbox("Select train to remove", train_ids)
+      selected = st.selectbox("Select train to remove", train_ids, key="remove_train_select")
         
       if st.button("Remove / Depart", type="primary"):
             for road in st.session_state.roads:
@@ -242,10 +242,10 @@ elif action == "Reserve Road":
     else:
         with st.form("reserve_form"):
             road_options = [f"{r['yard']} — {r['road']} ({r['capacity']}m)" for r in empty_roads]
-            chosen = st.selectbox("Road to reserve", road_options)
+            chosen = st.selectbox("Road to reserve", road_options, key="reserve_road_select")
             train = st.text_input("Train ID")
             operator = st.text_input("Operator")
-            train_type = st.selectbox("Type", ["Intermodal", "Grain", "Steel", "Container", "Ballast", "Infrastructure", "Locomotive", "Other"])
+            train_type = st.selectbox("Type", ["Intermodal", "Grain", "Steel", "Container", "Ballast", "Infrastructure", "Locomotive", "Other"], key="reserve_type")
             length = st.number_input("Length (m)", min_value=1, value=400)
             num_locos = st.number_input("Number of locomotives", min_value=0, value=1)
             locomotives = st.text_input("Locomotives")
@@ -302,7 +302,7 @@ elif action == "Unreserve Road":
         st.info("No roads are currently reserved")
     else:
         road_options = [f"{r['yard']} — {r['road']} ({r.get('train', 'No train')})" for r in reserved]
-        chosen = st.selectbox("Select reserved road", road_options)
+        chosen = st.selectbox("Select reserved road", road_options, key="unreserve_select")
         
         if st.button("Unreserve", type="primary"):
             road_name = chosen.split(" — ")[1].split(" (")[0]
@@ -345,7 +345,7 @@ elif action == "Maintenance Lock":
     
     if available:
         road_options = [f"{r['yard']} — {r['road']}" for r in available]
-        chosen = st.selectbox("Select road to lock", road_options)
+        chosen = st.selectbox("Select road to lock", road_options, key="lock_road_select")
         lock_type = st.radio("Lock type", ["Maintenance", "Occupation"])
         reason = st.text_input("Reason / Works description")
         locked_by = st.text_input("Locked by (name)")
@@ -382,7 +382,7 @@ elif action == "Maintenance Lock":
     
     if locked:
         locked_options = [f"{r['yard']} — {r['road']} ({r['status']})" for r in locked]
-        to_unlock = st.selectbox("Select locked road", locked_options)
+        to_unlock = st.selectbox("Select locked road", locked_options, key="unlock_road_select")
         road_name_to_unlock = to_unlock.split(" — ")[1].split(" (")[0] if to_unlock else ""
         verify_unlock = st.text_input(f"Type the road name to confirm unlock: {road_name_to_unlock}")
         
@@ -406,7 +406,7 @@ elif action == "Maintenance Lock":
 
     road_names = [r["road"] for r in st.session_state.roads if r.get("status") not in ["Maintenance", "Occupation"]]
     if road_names:
-        selected_road = st.selectbox("Select road to book out", road_names, key="bookout_select")
+        selected_road = st.selectbox("Select road to book out", road_names, key="bookout_road_select")
         bookout_reason = st.text_input("Reason for booking out")
         bookout_by = st.text_input("Booked out by")
     
@@ -449,7 +449,7 @@ elif action == "Maintenance Lock":
     booked_out = [r for r in st.session_state.roads if r.get("status") == "Booked Out"]
     if booked_out:
       return_options = [f"{r['yard']} — {r['road']}" for r in booked_out]
-      to_return = st.selectbox("Select road to return", return_options, key="return_select")
+      to_return = st.selectbox("Select road to return", return_options, key="return_road_select")
       return_by = st.text_input("Returned to service by")
     
       road_to_return = to_return.split(" — ")[1] if to_return else ""
