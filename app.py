@@ -144,23 +144,23 @@ if action == "Stable Train":
       pending = st.session_state.pending_train
       length = pending["length"]
 
-  suitable = []
-for r in st.session_state.roads:
+    suitable = []
+  for r in st.session_state.roads:
     status = str(r.get("status", ""))
     capacity = r.get("capacity", 0) or 0
     current_length = r.get("length", 0) or 0
 
-    if any(x in status for x in ["Maintenance", "Occupation", "Booked Out"]):
-        continue
+      if any(x in status for x in ["Maintenance", "Occupation", "Booked Out"]):
+          continue
 
-    if "Empty" in status and capacity >= length:
+      if "Empty" in status and capacity >= length:
         suitable.append(r)
-    elif "Occupied" in status:
+      elif "Occupied" in status:
         remaining = capacity - current_length
         if remaining >= length:
             suitable.append(r)
 
-if road["road"] == road_name:
+  if road["road"] == road_name:
       new_length = (road.get("length", 0) or 0) + pending["length"]
   
       new_status = "Occupied"
@@ -178,9 +178,9 @@ if road["road"] == road_name:
         "departure": pending["departure"]
       })
 
-if not suitable:
+  if not suitable:
       st.error("No suitable empty roads for this train length")
-else:
+  else:
       road_options = [f"{r['yard']} — {r['road']} ({r['capacity']}m)" for r in suitable]
       chosen = st.selectbox("Allocate to", road_options)
       if st.button("Confirm allocation", type="primary"):
