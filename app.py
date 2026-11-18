@@ -227,7 +227,7 @@ elif action == "Remove / Depart Train":
       train_ids = [r["train"] for r in occupied]
       selected = st.selectbox("Select train to remove", train_ids)
         
-        if st.button("Remove / Depart", type="primary"):
+      if st.button("Remove / Depart", type="primary"):
             for road in st.session_state.roads:
                 if road.get("train") == selected:
                     road.update({
