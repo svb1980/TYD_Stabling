@@ -94,102 +94,88 @@ def add_status_icon(status):
 if "status" in df.columns:
     df["status"] = df["status"].apply(add_status_icon)
 
-# Add lock details if present
-if "lock_reason" not in df.columns:
-    df["lock_reason"] = ""
-if "locked_by" not in df.columns:
-    df["locked_by"] = ""
-
-wanted = ["road", "yard", "status", "train", "type", "operator", "num_locos", "locomotives", "wagons", "loaded", "arrival", "departure", "length", "capacity", "lock_reason", "locked_by"]
-display_cols = [c for c in wanted if c in df.columns]
-
-st.subheader("Current Yard")
-st.dataframe(df[display_cols], use_container_width=True, hide_index=True)
-
-#Actions
 if action == "Stable Train":
-  st.subheader("Stable a Train")
-  
-  with st.form("stable_form"):
-    train = st.text_input("Train ID")
-    operator = st.text_input("Operator")
-    train_type = st.selectbox("Type", ["Intermodal", "Grain", "Steel", "Container", "Ballast", "Infrastructure", "Locomotive", "Other"])
-    length = st.number_input("Length (m)", min_value=1, value=1200)
-    num_locomotives = st.number_input("Number of Locomotives", min_value=1, value=1)
-    locomotives = st.text_input("Locomotives")
-    num_wagons = st.number_input("Number of wagons", min_value=0, value=0)
-    loaded = st.checkbox("Wagons are loaded", value=True)
+    st.subheader("Stable a Train")
 
-    col1, col2 = st.columns(2)
-    with col1:
-      arrival_date = st.date_input("Arrival date")
-      arrival_time = st.time_input("Arrival time")
-    with col2:
-      departure_date = st.date_input("Departure date")
-      departure_time = st.time_input("Departure time")
-    
-    submitted = st.form_submit_button("Find suitable roads")
+    with st.form("stable_form"):
+        train = st.text_input("Train ID")
+        operator = st.text_input("Operator")
+        train_type = st.selectbox("Type", ["Intermodal", "Grain", "Steel", "Container", "Ballast", "Infrastructure", "Locomotive", "Other"])
+        length = st.number_input("Length (m)", min_value=1, value=400)
+        num_locos = st.number_input("Number of locomotives", min_value=0, value=1)
+        locomotives = st.text_input("Locomotive number(s)")
+        wagons = st.number_input("Number of wagons", min_value=0, value=0)
+        loaded = st.checkbox("Wagons are loaded", value=True)
+
+        col1, col2 = st.columns(2)
+        with col1:
+            arrival_date = st.date_input("Arrival date")
+            arrival_time = st.time_input("Arrival time")
+        with col2:
+            departure_date = st.date_input("Departure date")
+            departure_time = st.time_input("Departure time")
+
+        submitted = st.form_submit_button("Find suitable roads")
 
     if submitted and train:
-      arrival_str = f"{arrival_date.strftime('%d-%m-%Y')} {arrival_time.strftime('%H:%M')}"
-      departure_str = f"{departure_date.strftime('%d-%m-%Y')} {departure_time.strftime('%H:%M')}"
-      
-      st.session_state.pending_train = {
-        "train": train,
-        "operator": operator,
-        "type": train_type,
-        "length": int(length),
-        "num_locomotives": int(num_locomotives),
-        "locomotives": locomotives,
-        "num_wagons": int(num_wagons),
-        "loaded": loaded,
-        "arrival": arrival_str,
-        "departure": departure_str
-      }
+        arrival_str = f"{arrival_date.strftime('%d-%m-%Y')} {arrival_time.strftime('%H:%M')}"
+        departure_str = f"{departure_date.strftime('%d-%m-%Y')} {departure_time.strftime('%H:%M')}"
 
-  st.write("### Debug filter")
-  for r in st.session_state.roads:
-    status_ok = "Empty" in str(r.get("status", ""))
-    cap = r.get("capacity", 0)
-    cap_ok = cap >= length
-    blocked = any(x in str(r.get("status", "")) for x in ["Occupied", "Maintenance", "Occupation", "Booked Out"])
-    if status_ok and not blocked:
-      st.write(f"{r['road']}: capacity={cap}, meets length={cap_ok}")
+        st.session_state.pending_train = {
+            "train": train,
+            "operator": operator,
+            "type": train_type,
+            "length": int(length),
+            "num_locos": int(num_locos),
+            "locomotives": locomotives,
+            "wagons": int(wagons),
+            "loaded": loaded,
+            "arrival": arrival_str,
+            "departure": departure_str
+        }
 
-    if suitable:
-      road_options = [f"{r['yard']} - {r['road']} ({r['capacity']}m)" for r in suitable]
-      chosen = st.selectbox("Allocate to", road_options)
-    if st.button("Confirm allocation"):
-
-      if "pending_train" in st.session_state and st.session_state.pending_train:
+    if "pending_train" in st.session_state and st.session_state.pending_train:
         pending = st.session_state.pending_train
-        suitable = st.session_state.get("suitable_roads", [])
-    
-      else:
-        road_options = [f"{r['yard']} - {r['road']} ({r['capacity']}m)" for r in suitable]
-        chosen = st.selectbox("Allocate to", road_options)
-        if st.form_submit_button("Confirm allocation"):
-          road_name = chosen.split(" - ")[1].split(" (")[0]
-          for road in st.session_state.roads:
-            if road["road"] == road_name:
-              road.update({
-                "status": "Occupied",
-                "train": pending["train"],
-                "operator": pending["operator"],
-                "type": pending["type"],
-                "length": pending["length"],
-                "num_locomotives": pending["num_locomotives"],
-                "locomotives": pending["locomotives"],
-                "num_wagons": pending["num_wagons"],
-                "loaded": pending["loaded"],
-                "arrival": pending["arrival"],
-                "departure": pending["departure"]
-              })
-              st.session_state.movements.append(
-                f"{datetime.now():%d-%m-%Y %H:%M} - ALLOCATED {pending['train']} TO {road_name}"
-              )
-              st.session_state.action_message = f"Train {pending['train']} allocated to {road_name}"
-              st.rerun()
+        length = pending["length"]
+
+        suitable = [
+            r for r in st.session_state.roads
+            if "Empty" in str(r.get("status", ""))
+            and "Occupied" not in str(r.get("status", ""))
+            and "Maintenance" not in str(r.get("status", ""))
+            and "Occupation" not in str(r.get("status", ""))
+            and "Booked Out" not in str(r.get("status", ""))
+            and r.get("capacity", 0) >= length
+        ]
+
+        if not suitable:
+            st.error("No suitable empty roads for this train length")
+        else:
+            road_options = [f"{r['yard']} — {r['road']} ({r['capacity']}m)" for r in suitable]
+            chosen = st.selectbox("Allocate to", road_options)
+            if st.button("Confirm allocation", type="primary"):
+                road_name = chosen.split(" — ")[1].split(" (")[0]
+                for road in st.session_state.roads:
+                    if road["road"] == road_name:
+                        road.update({
+                            "status": "Occupied",
+                            "train": pending["train"],
+                            "operator": pending["operator"],
+                            "type": pending["type"],
+                            "length": pending["length"],
+                            "num_locos": pending["num_locos"],
+                            "locomotives": pending["locomotives"],
+                            "wagons": pending["wagons"],
+                            "loaded": pending["loaded"],
+                            "arrival": pending["arrival"],
+                            "departure": pending["departure"]
+                        })
+                        st.session_state.movements.append(
+                            f"{datetime.now():%Y-%m-%d %H:%M} — ALLOCATED {pending['train']} TO {road_name}"
+                        )
+                        st.session_state.action_message = f"Train {pending['train']} allocated to {road_name}"
+                        del st.session_state.pending_train
+                        st.rerun()
 
 elif action == "Remove / Depart Train":
     st.subheader("Remove or Depart a Train")
