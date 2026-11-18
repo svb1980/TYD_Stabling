@@ -221,11 +221,11 @@ elif action == "Remove / Depart Train":
     if "Occupied" in str(r.get("status", "")) and r.get("train")
   ]
     
-    if not occupied:
-        st.info("No trains currently stabled")
-    else:
-        train_ids = [r["train"] for r in occupied]
-        selected = st.selectbox("Select train to remove", train_ids)
+  if not occupied:
+      st.info("No trains currently stabled")
+  else:
+      train_ids = [r["train"] for r in occupied]
+      selected = st.selectbox("Select train to remove", train_ids)
         
         if st.button("Remove / Depart", type="primary"):
             for road in st.session_state.roads:
