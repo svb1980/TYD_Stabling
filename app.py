@@ -151,7 +151,7 @@ st.write("Debug - all statuses:")
 st.write([r.get("status") for r in st.session_state.roads])
 st.write(f"Train length entered: {length}")
       
-    suitable = [
+  suitable = [
         r for r in st.session_state.roads 
         if "Empty" in str(r.get("status", ""))
         and "Occupied" not in str(r.get("status", ""))
