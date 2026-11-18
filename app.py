@@ -410,7 +410,7 @@ elif action == "Maintenance Lock":
         bookout_reason = st.text_input("Reason for booking out")
         bookout_by = st.text_input("Booked out by")
     
-        verify_book = st.text_input(f"Type the road name to confirm: {selected_road}")
+        verify_book = st.text_input(f"Type the road name to confirm: {selected_road}", key="verify_book_input")
     
         if st.button("Book Out Road", type="primary"):
             if verify_book.strip() != selected_road:
