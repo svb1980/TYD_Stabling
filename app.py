@@ -180,7 +180,7 @@ if road["road"] == road_name:
 
 if not suitable:
       st.error("No suitable empty roads for this train length")
-  else:
+else:
       road_options = [f"{r['yard']} — {r['road']} ({r['capacity']}m)" for r in suitable]
       chosen = st.selectbox("Allocate to", road_options)
       if st.button("Confirm allocation", type="primary"):
