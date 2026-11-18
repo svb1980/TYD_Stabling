@@ -144,27 +144,21 @@ if action == "Stable Train":
       pending = st.session_state.pending_train
       length = pending["length"]
 
-      suitable = [
-            r for r in st.session_state.roads
-            if "Empty" in str(r.get("status", ""))
-            and "Occupied" not in str(r.get("status", ""))
-            and "Maintenance" not in str(r.get("status", ""))
-            and "Occupation" not in str(r.get("status", ""))
-            and "Booked Out" not in str(r.get("status", ""))
-            and r.get("capacity", 0) >= length
-      ]
-    
-    
-  if any(x in status for x in ["Maintenance", "Occupation", "Booked Out"]):
-    continue
-    
-  if "Empty" in status and capacity >= length:
-      suitable.append(r)
-    
-  elif "Occupied" in status:
-      remaining = capacity - current_length
-      if remaining >= length:
-          suitable.append(r)
+  suitable = []
+for r in st.session_state.roads:
+    status = str(r.get("status", ""))
+    capacity = r.get("capacity", 0) or 0
+    current_length = r.get("length", 0) or 0
+
+    if any(x in status for x in ["Maintenance", "Occupation", "Booked Out"]):
+        continue
+
+    if "Empty" in status and capacity >= length:
+        suitable.append(r)
+    elif "Occupied" in status:
+        remaining = capacity - current_length
+        if remaining >= length:
+            suitable.append(r)
 
   if road["road"] == road_name:
       new_length = (road.get("length", 0) or 0) + pending["length"]
