@@ -161,7 +161,7 @@ if action == "Stable Train":
         and r.get("capacity", 0) >= length
       ]
 
-    if "pending_train" in st.session_state and st.session_state.pending_train:
+  if "pending_train" in st.session_state and st.session_state.pending_train:
       pending = st.session_state.pending_train
       suitable = st.session_state.get("suitable_roads", [])
 
