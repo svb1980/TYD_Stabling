@@ -147,11 +147,11 @@ if action == "Stable Train":
         "departure": departure_str
       }
       suitable = [
-    r for r in st.session_state.roads 
-    if "Empty" in str(r.get("status", ""))
-    and r.get("capacity", 0) >= length
-    and r.get("status") not in ["Maintenance", "Occupation", "Booked Out"]
-]
+        r for r in st.session_state.roads 
+        if "Empty" in str(r.get("status", ""))
+        and r.get("capacity", 0) >= length
+        and r.get("status") not in ["Maintenance", "Occupation", "Booked Out"]
+      ]
 
     if "pending_train" in st.session_state and st.session_state.pending_train:
       pending = st.session_state.pending_train
