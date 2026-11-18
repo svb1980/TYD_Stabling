@@ -156,7 +156,7 @@ if action == "Stable Train":
     if status_ok and not blocked:
       st.write(f"{r['road']}: capacity={cap}, meets length={cap_ok}")
 
-  suitable = [
+  if suitable = [
     r for r in st.session_state.roads
     if "Empty" in str(r.get("status", ""))
     and not any(x in str(r.get("status", "")) for x in ["Occupied", "Maintenance", "Occupation", "Booked Out"])
