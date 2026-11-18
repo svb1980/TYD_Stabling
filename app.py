@@ -159,11 +159,11 @@ if action == "Stable Train":
   if suitable:
     road_options = [f"{r['yard']} - {r['road']} ({r['capacity']}m)" for r in suitable]
     chosen = st.selectbox("Allocate to", road_options)
-  if st.button("Confirm allocation"):
+    if st.button("Confirm allocation"):
 
-  if "pending_train" in st.session_state and st.session_state.pending_train:
-      pending = st.session_state.pending_train
-      suitable = st.session_state.get("suitable_roads", [])
+      if "pending_train" in st.session_state and st.session_state.pending_train:
+        pending = st.session_state.pending_train
+        suitable = st.session_state.get("suitable_roads", [])
     
       else:
         road_options = [f"{r['yard']} - {r['road']} ({r['capacity']}m)" for r in suitable]
