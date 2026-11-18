@@ -149,8 +149,11 @@ if action == "Stable Train":
       suitable = [
         r for r in st.session_state.roads 
         if "Empty" in str(r.get("status", ""))
+        and "Occupied" not in str(r.get("status", ""))
+        and "Maintenance" not in str(r.get("status", ""))
+        and "Occupation" not in str(r.get("status", ""))
+        and "Booked Out" not in str(r.get("status", ""))
         and r.get("capacity", 0) >= length
-        and r.get("status") not in ["Maintenance", "Occupation", "Booked Out"]
       ]
 
     if "pending_train" in st.session_state and st.session_state.pending_train:
