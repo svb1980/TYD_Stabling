@@ -206,12 +206,12 @@ if action == "Stable Train":
                       "arrival": pending["arrival"],
                       "departure": pending["departure"]
                   })
-            st.session_state.movements.append(
-                f"{datetime.now():%Y-%m-%d %H:%M} — ALLOCATED {pending['train']} TO {road_name}"
-            )
-            st.session_state.action_message = f"Train {pending['train']} allocated to {road_name}"
-            del st.session_state.pending_train
-            st.rerun()
+                  st.session_state.movements.append(
+                      f"{datetime.now():%Y-%m-%d %H:%M} — ALLOCATED {pending['train']} TO {road_name}"
+                  )
+                  st.session_state.action_message = f"Train {pending['train']} allocated to {road_name}"
+                  del st.session_state.pending_train
+                  st.rerun()
 
 elif action == "Remove / Depart Train":
   st.subheader("Remove or Depart a Train")
