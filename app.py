@@ -3,7 +3,6 @@ import pandas as pd
 import json
 from datetime import datetime
 
-# Simple password gate
 def check_password():
   def password_entered():
     if st.session_state["password"] == "MArS1SpA":
@@ -163,7 +162,7 @@ if action == "Stable Train":
             st.error("No suitable empty roads for this train length")
         else:
             road_options = [f"{r['yard']} — {r['road']} ({r['capacity']}m)" for r in suitable]
-            chosen = st.selectbox("Stable in", road_options)
+            chosen = st.selectbox("Stable in", road_options, key=f"stable_in_{pending.get('train', 'none')}")
             if st.button("Confirm allocation", type="primary"):
                 road_name = chosen.split(" — ")[1].split(" (")[0]
                 for road in st.session_state.roads:
