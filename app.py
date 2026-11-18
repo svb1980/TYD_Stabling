@@ -147,19 +147,22 @@ if action == "Stable Train":
         "departure": departure_str
       }
 
-  st.write("Debug - all statuses:")
-  st.write([r.get("status") for r in st.session_state.roads])
-  st.write(f"Train length entered: {length}")
-      
+  st.write("### Debug filter")
+  r for r in st.session_state.roads:
+    status_ok = "Empty" in str(r.get("status", ""))
+    cap = r.get("capacity", 0)
+    cap_ok = cap >= length
+    blocked = any(x in str(r.get("status", "")) for x in ["Occupied", "Maintenance", "Occupation", "Booked Out"])
+    if status_ok and not blocked:
+      st.write(f"{r['road']}: capacity={cap}, meets length={cap_ok}")
+
   suitable = [
-        r for r in st.session_state.roads 
-        if "Empty" in str(r.get("status", ""))
-        and "Occupied" not in str(r.get("status", ""))
-        and "Maintenance" not in str(r.get("status", ""))
-        and "Occupation" not in str(r.get("status", ""))
-        and "Booked Out" not in str(r.get("status", ""))
-        and r.get("capacity", 0) >= length
-      ]
+    r for r in st.session_state.roads
+    if "Empty" in str(r.get("status", ""))
+    and not any(x in str(r.get("status", "")) for x in ["Occupied", "Maintenance", "Occupation", "Booked Out"])
+    and r.get("capacity", 0) >= length
+  ]
+  st.write(f"Suitable roads found: {len(suitable)}")
 
   if "pending_train" in st.session_state and st.session_state.pending_train:
       pending = st.session_state.pending_train
