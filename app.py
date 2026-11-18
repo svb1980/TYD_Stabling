@@ -505,7 +505,7 @@ elif action == "Statistics & Reports":
   st.divider()
 
   # Length utilisatrion
-  occupied_length = sum(r["length"] for r in roads if "Occupied" in str(r.get("status", "")):
+  occupied_length = sum(r["length"] for r in roads if "Occupied" in str(r.get("status", "")))
   total_capacity = sum(r["capacity"] for r in roads)
   length_util = round((occupied_length / total_capacity) * 100) if total_capacity else 0
   st.metric("Length Utilisation", f"{length_util}%", f"{occupied_length}m / {total_capacity}m")
