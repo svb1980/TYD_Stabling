@@ -156,9 +156,9 @@ if action == "Stable Train":
     if status_ok and not blocked:
       st.write(f"{r['road']}: capacity={cap}, meets length={cap_ok}")
 
-  if suitable:
-    road_options = [f"{r['yard']} - {r['road']} ({r['capacity']}m)" for r in suitable]
-    chosen = st.selectbox("Allocate to", road_options)
+    if suitable:
+      road_options = [f"{r['yard']} - {r['road']} ({r['capacity']}m)" for r in suitable]
+      chosen = st.selectbox("Allocate to", road_options)
     if st.button("Confirm allocation"):
 
       if "pending_train" in st.session_state and st.session_state.pending_train:
