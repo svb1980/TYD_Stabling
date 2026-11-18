@@ -144,7 +144,7 @@ if action == "Stable Train":
         pending = st.session_state.pending_train
         length = pending["length"]
 
-       suitable = []
+suitable = []
 for r in st.session_state.roads:
     status = str(r.get("status", ""))
     capacity = r.get("capacity", 0)
