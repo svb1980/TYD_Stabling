@@ -30,6 +30,34 @@ st.error("**FOR SITUATIONAL AWARENESS ONLY**\n\nNOT TO BE USED FOR SAFEWORKING O
 st.set_page_config(page_title="TYD Stabling", layout="wide")
 st.title("Tottenham Freight Yard - Stabling")
 
+# Always show the yard table
+df = pd.DataFrame(st.session_state.roads)
+
+def add_status_icon(status):
+    status = str(status)
+    if "Occupied" in status:
+        return "🔴 Occupied"
+    elif "Reserved" in status:
+        return "🟡 Reserved"
+    elif "Booked Out" in status:
+        return "⚪ Booked Out"
+    elif "Empty" in status:
+        return "🟢 Empty"
+    elif "Maintenance" in status:
+        return "🔧 Maintenance"
+    elif "Occupation" in status:
+        return "🚧 Occupation"
+    return status
+
+if "status" in df.columns:
+    df["status"] = df["status"].apply(add_status_icon)
+
+wanted = ["road", "yard", "status", "train", "type", "operator", "num_locos", "locomotives", "wagons", "loaded", "arrival", "departure", "length", "capacity", "lock_reason", "locked_by"]
+display_cols = [c for c in wanted if c in df.columns]
+
+st.subheader("Current Yard")
+st.dataframe(df[display_cols], use_container_width=True, hide_index=True)
+
 #Default roads (your original data)
 DEFAULT_ROADS=[
   {"road": "A/D Road", "yard": "Arrival/Departure", "status": "Empty", "train": "", "operator": "", "type": "", "length": 0, "arrival": "", "departure": "", "capacity": 1500},
@@ -71,28 +99,6 @@ action = st.sidebar.selectbox(
 )
 
 roads = st.session_state.roads
-
-# Yard table with visible status indicators
-df = pd.DataFrame(st.session_state.roads)
-
-def add_status_icon(status):
-    status = str(status)
-    if status == "Occupied":
-        return "🔴 Occupied"
-    elif status == "Reserved":
-        return "🟡 Reserved"
-    elif status == "Booked Out":
-        return "⚪ Booked Out"
-    elif status == "Empty":
-        return "🟢 Empty"
-    elif status == "Maintenance":
-        return "🔧 Maintenance"
-    elif status == "Occupation":
-        return "🚧 Occupation"
-    return status
-
-if "status" in df.columns:
-    df["status"] = df["status"].apply(add_status_icon)
 
 if action == "Stable Train":
     st.subheader("Stable a Train")
@@ -138,15 +144,43 @@ if action == "Stable Train":
         pending = st.session_state.pending_train
         length = pending["length"]
 
-        suitable = [
-            r for r in st.session_state.roads
-            if "Empty" in str(r.get("status", ""))
-            and "Occupied" not in str(r.get("status", ""))
-            and "Maintenance" not in str(r.get("status", ""))
-            and "Occupation" not in str(r.get("status", ""))
-            and "Booked Out" not in str(r.get("status", ""))
-            and r.get("capacity", 0) >= length
-        ]
+       suitable = []
+for r in st.session_state.roads:
+    status = str(r.get("status", ""))
+    capacity = r.get("capacity", 0)
+    current_length = r.get("length", 0) or 0
+    
+    # Hard block these
+    if any(x in status for x in ["Maintenance", "Occupation", "Booked Out"]):
+        continue
+    
+    # Empty road - full capacity available
+    if "Empty" in status and capacity >= length:
+        suitable.append(r)
+    
+    # Already occupied - only if enough room left
+    elif "Occupied" in status:
+        remaining = capacity - current_length
+        if remaining >= length:
+            suitable.append(r)
+
+      if road["road"] == road_name:
+    new_length = (road.get("length", 0) or 0) + pending["length"]
+    # If it was empty, mark occupied. If already occupied, keep it occupied.
+    new_status = "Occupied"
+    road.update({
+        "status": new_status,
+        "train": pending["train"] if "Empty" in str(road.get("status", "")) else f"{road.get('train', '')} + {pending['train']}",
+        "operator": pending["operator"],
+        "type": pending["type"],
+        "length": new_length,
+        "num_locos": (road.get("num_locos", 0) or 0) + pending["num_locos"],
+        "locomotives": f"{road.get('locomotives', '')} {pending['locomotives']}".strip(),
+        "wagons": (road.get("wagons", 0) or 0) + pending["wagons"],
+        "loaded": pending["loaded"],
+        "arrival": pending["arrival"],
+        "departure": pending["departure"]
+    })
 
         if not suitable:
             st.error("No suitable empty roads for this train length")
