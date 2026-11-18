@@ -30,34 +30,6 @@ st.error("**FOR SITUATIONAL AWARENESS ONLY**\n\nNOT TO BE USED FOR SAFEWORKING O
 st.set_page_config(page_title="TYD Stabling", layout="wide")
 st.title("Tottenham Freight Yard - Stabling")
 
-# Always show the yard table
-df = pd.DataFrame(st.session_state.roads)
-
-def add_status_icon(status):
-    status = str(status)
-    if "Occupied" in status:
-        return "🔴 Occupied"
-    elif "Reserved" in status:
-        return "🟡 Reserved"
-    elif "Booked Out" in status:
-        return "⚪ Booked Out"
-    elif "Empty" in status:
-        return "🟢 Empty"
-    elif "Maintenance" in status:
-        return "🔧 Maintenance"
-    elif "Occupation" in status:
-        return "🚧 Occupation"
-    return status
-
-if "status" in df.columns:
-    df["status"] = df["status"].apply(add_status_icon)
-
-wanted = ["road", "yard", "status", "train", "type", "operator", "num_locos", "locomotives", "wagons", "loaded", "arrival", "departure", "length", "capacity", "lock_reason", "locked_by"]
-display_cols = [c for c in wanted if c in df.columns]
-
-st.subheader("Current Yard")
-st.dataframe(df[display_cols], use_container_width=True, hide_index=True)
-
 #Default roads (your original data)
 DEFAULT_ROADS=[
   {"road": "A/D Road", "yard": "Arrival/Departure", "status": "Empty", "train": "", "operator": "", "type": "", "length": 0, "arrival": "", "departure": "", "capacity": 1500},
@@ -85,6 +57,33 @@ if "roads" not in st.session_state:
   st.session_state.roads = [r.copy() for r in DEFAULT_ROADS]
 if "movements" not in st.session_state:
   st.session_state.movements = []
+
+df = pd.DataFrame(st.session_state.roads)
+
+def add_status_icon(status):
+    status = str(status)
+    if "Occupied" in status:
+        return "🔴 Occupied"
+    elif "Reserved" in status:
+        return "🟡 Reserved"
+    elif "Booked Out" in status:
+        return "⚪ Booked Out"
+    elif "Empty" in status:
+        return "🟢 Empty"
+    elif "Maintenance" in status:
+        return "🔧 Maintenance"
+    elif "Occupation" in status:
+        return "🚧 Occupation"
+    return status
+
+if "status" in df.columns:
+   df["status"] = df["status"].apply(add_status_icon)
+
+wanted = ["road", "yard", "status", "train", "type", "operator", "num_locos", "locomotives", "wagons", "loaded", "arrival", "departure", "length", "capacity", "lock_reason", "locked_by"]
+display_cols = [c for c in wanted if c in df.columns]
+
+st.subheader("Current Yard")
+st.dataframe(df[display_cols], use_container_width=True, hide_index=True)
 
 # Persistent confirmation message
 if "action_message" in st.session_state:
