@@ -448,7 +448,7 @@ elif action == "Maintenance Lock":
     if booked_out:
       return_options = [f"{r['yard']} — {r['road']}" for r in booked_out]
       to_return = st.selectbox("Select road to return", return_options, key="return_select")
-        return_by = st.text_input("Returned to service by")
+      return_by = st.text_input("Returned to service by")
     
         road_to_return = to_return.split(" — ")[1] if to_return else ""
         verify_return = st.text_input(f"Type the road name to confirm: {road_to_return}", key="verify_return_input")
