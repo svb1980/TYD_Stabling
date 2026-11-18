@@ -399,90 +399,90 @@ elif action == "Maintenance Lock":
                         st.session_state.action_message = f"Lock removed from {road_name_to_unlock}"
                         st.rerun()
   
-  st.divider()
-  st.subheader("Book Out a Road")
+    st.divider()
+    st.subheader("Book Out a Road")
 
-  road_names = [r["road"] for r in st.session_state.roads if r.get("status") not in ["Maintenance", "Occupation"]]
-  if road_names:
-      selected_road = st.selectbox("Select road to book out", road_names, key="bookout_select")
-      bookout_reason = st.text_input("Reason for booking out")
-      bookout_by = st.text_input("Booked out by")
+    road_names = [r["road"] for r in st.session_state.roads if r.get("status") not in ["Maintenance", "Occupation"]]
+    if road_names:
+        selected_road = st.selectbox("Select road to book out", road_names, key="bookout_select")
+        bookout_reason = st.text_input("Reason for booking out")
+        bookout_by = st.text_input("Booked out by")
     
-      verify_book = st.text_input(f"Type the road name to confirm: {selected_road}")
+        verify_book = st.text_input(f"Type the road name to confirm: {selected_road}")
     
-      if st.button("Book Out Road", type="primary"):
-          if verify_book.strip() != selected_road:
-              st.error("Road name does not match")
-          elif not bookout_by:
-              st.error("Enter who is booking the road out")
-          else:
-              for road in st.session_state.roads:
-                  if road["road"] == selected_road:
-                      road.update({
-                          "status": "Booked Out",
-                          "train": "",
-                          "operator": "",
-                          "type": "",
-                          "length": 0,
-                          "num_locos": 0,
-                          "locomotives": "",
-                          "wagons": 0,
-                          "loaded": False,
-                          "arrival": "",
-                          "departure": "",
-                          "lock_reason": bookout_reason,
-                          "locked_by": bookout_by
-                      })
-                      st.session_state.movements.append(
-                          f"{datetime.now():%Y-%m-%d %H:%M} — BOOKED OUT {selected_road} by {bookout_by}"
-                      )
-                      st.session_state.action_message = f"{selected_road} booked out"
-                      st.rerun()
-  else:
-      st.info("No roads available to book out")
+        if st.button("Book Out Road", type="primary"):
+            if verify_book.strip() != selected_road:
+                st.error("Road name does not match")
+            elif not bookout_by:
+                st.error("Enter who is booking the road out")
+            else:
+                for road in st.session_state.roads:
+                    if road["road"] == selected_road:
+                        road.update({
+                            "status": "Booked Out",
+                            "train": "",
+                            "operator": "",
+                            "type": "",
+                            "length": 0,
+                            "num_locos": 0,
+                            "locomotives": "",
+                            "wagons": 0,
+                            "loaded": False,
+                            "arrival": "",
+                            "departure": "",
+                            "lock_reason": bookout_reason,
+                            "locked_by": bookout_by
+                        })
+                        st.session_state.movements.append(
+                            f"{datetime.now():%Y-%m-%d %H:%M} — BOOKED OUT {selected_road} by {bookout_by}"
+                        )
+                        st.session_state.action_message = f"{selected_road} booked out"
+                        st.rerun()
+    else:
+        st.info("No roads available to book out")
 
-  st.divider()
-  st.subheader("Return Road to Service")
+    st.divider()
+    st.subheader("Return Road to Service")
 
-  booked_out = [r for r in st.session_state.roads if r.get("status") == "Booked Out"]
-  if booked_out:
-    return_options = [f"{r['yard']} — {r['road']}" for r in booked_out]
-      to_return = st.selectbox("Select road to return", return_options, key="return_select")
-      return_by = st.text_input("Returned to service by")
+    booked_out = [r for r in st.session_state.roads if r.get("status") == "Booked Out"]
+    if booked_out:
+      return_options = [f"{r['yard']} — {r['road']}" for r in booked_out]
+        to_return = st.selectbox("Select road to return", return_options, key="return_select")
+        return_by = st.text_input("Returned to service by")
     
-      road_to_return = to_return.split(" — ")[1] if to_return else ""
-      verify_return = st.text_input(f"Type the road name to confirm: {road_to_return}", key="verify_return_input")
+        road_to_return = to_return.split(" — ")[1] if to_return else ""
+        verify_return = st.text_input(f"Type the road name to confirm: {road_to_return}", key="verify_return_input")
     
-      if st.button("Return to Service"):
-          if verify_return.strip() != road_to_return:
-              st.error("Road name does not match")
-          elif not return_by:
-              st.error("Enter who is returning the road")
-          else:
-              for road in st.session_state.roads:
-                  if road["road"] == road_to_return:
-                      road.update({
-                          "status": "Empty",
-                          "train": "",
-                          "operator": "",
-                          "type": "",
-                          "length": 0,
-                          "num_locos": 0,
-                          "locomotives": "",
-                          "wagons": 0,
-                          "loaded": False,
-                          "arrival": "",
-                          "departure": "",
-                          "lock_reason": "",
-                          "locked_by": ""
-                      })
-                      st.session_state.movements.append(
-                          f"{datetime.now():%Y-%m-%d %H:%M} — RETURNED {road_to_return} TO SERVICE by {return_by}"
-                      )
-                      st.session_state.action_message = f"{road_to_return} returned to service"
-                      st.rerun()
-              else:
-                st.info("No roads currently booked out")
+        if st.button("Return to Service"):
+            if verify_return.strip() != road_to_return:
+                st.error("Road name does not match")
+            elif not return_by:
+                st.error("Enter who is returning the road")
+            else:
+                for road in st.session_state.roads:
+                    if road["road"] == road_to_return:
+                        road.update({
+                            "status": "Empty",
+                            "train": "",
+                            "operator": "",
+                            "type": "",
+                            "length": 0,
+                            "num_locos": 0,
+                            "locomotives": "",
+                            "wagons": 0,
+                            "loaded": False,
+                            "arrival": "",
+                            "departure": "",
+                            "lock_reason": "",
+                            "locked_by": ""
+                        })
+                        st.session_state.movements.append(
+                            f"{datetime.now():%Y-%m-%d %H:%M} — RETURNED {road_to_return} TO SERVICE by {return_by}"
+                        )
+                        st.session_state.action_message = f"{road_to_return} returned to service"
+                        st.rerun()
+                else:
+                  st.info("No roads currently booked out")
 
 elif action == "Statistics & Reports":
   st.subheader("Yard Statistics")
