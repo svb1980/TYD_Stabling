@@ -447,7 +447,7 @@ elif action == "Maintenance Lock":
     booked_out = [r for r in st.session_state.roads if r.get("status") == "Booked Out"]
     if booked_out:
       return_options = [f"{r['yard']} — {r['road']}" for r in booked_out]
-        to_return = st.selectbox("Select road to return", return_options, key="return_select")
+      to_return = st.selectbox("Select road to return", return_options, key="return_select")
         return_by = st.text_input("Returned to service by")
     
         road_to_return = to_return.split(" — ")[1] if to_return else ""
