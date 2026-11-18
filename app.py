@@ -157,19 +157,14 @@ if action == "Stable Train":
       st.write(f"{r['road']}: capacity={cap}, meets length={cap_ok}")
 
   if suitable:
-    [r for r in st.session_state.roads
-    if "Empty" in str(r.get("status", ""))
-    and not any(x in str(r.get("status", "")) for x in ["Occupied", "Maintenance", "Occupation", "Booked Out"])
-    and r.get("capacity", 0) >= length
-  ]
-  st.write(f"Suitable roads found: {len(suitable)}")
+    road_options = [f"{r['yard']} - {r['road']} ({r['capacity']}m)" for r in suitable]
+    chosen = st.selectbox("Allocate to", road_options)
+    if st.button("Confirm allocation"):
 
   if "pending_train" in st.session_state and st.session_state.pending_train:
       pending = st.session_state.pending_train
       suitable = st.session_state.get("suitable_roads", [])
-
-      if not suitable:
-        st.error("No suitable empty roads")
+    
       else:
         road_options = [f"{r['yard']} - {r['road']} ({r['capacity']}m)" for r in suitable]
         chosen = st.selectbox("Allocate to", road_options)
