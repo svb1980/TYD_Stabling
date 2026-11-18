@@ -147,9 +147,9 @@ if action == "Stable Train":
         "departure": departure_str
       }
 
-st.write("Debug - all statuses:")
-st.write([r.get("status") for r in st.session_state.roads])
-st.write(f"Train length entered: {length}")
+  st.write("Debug - all statuses:")
+  st.write([r.get("status") for r in st.session_state.roads])
+  st.write(f"Train length entered: {length}")
       
   suitable = [
         r for r in st.session_state.roads 
