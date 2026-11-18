@@ -163,7 +163,7 @@ if action == "Stable Train":
             st.error("No suitable empty roads for this train length")
         else:
             road_options = [f"{r['yard']} — {r['road']} ({r['capacity']}m)" for r in suitable]
-            chosen = st.selectbox("Allocate to", road_options)
+            chosen = st.selectbox("Allocate to", road_options, key="allocate_select")
             if st.button("Confirm allocation", type="primary"):
                 road_name = chosen.split(" — ")[1].split(" (")[0]
                 for road in st.session_state.roads:
