@@ -178,7 +178,7 @@ if road["road"] == road_name:
         "departure": pending["departure"]
       })
 
-  if not suitable:
+if not suitable:
       st.error("No suitable empty roads for this train length")
   else:
       road_options = [f"{r['yard']} — {r['road']} ({r['capacity']}m)" for r in suitable]
