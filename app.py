@@ -148,8 +148,8 @@ if action == "Stable Train":
       }
       suitable = [
     r for r in st.session_state.roads 
-    if r.get("status") == "Empty" 
-    and r["capacity"] >= length
+    if "Empty" in str(r.get("status", ""))
+    and r.get("capacity", 0) >= length
     and r.get("status") not in ["Maintenance", "Occupation", "Booked Out"]
 ]
 
@@ -453,7 +453,7 @@ if booked_out:
     return_by = st.text_input("Returned to service by")
     
     road_to_return = to_return.split(" — ")[1] if to_return else ""
-    verify_return = st.text_input(f"Type the road name to confirm: {road_to_return}")
+    verify_return = st.text_input(f"Type the road name to confirm: {road_to_return}", key="verify_return_input")
     
     if st.button("Return to Service"):
         if verify_return.strip() != road_to_return:
@@ -527,17 +527,22 @@ elif action == "Statistics & Reports":
   # Yard area summary
   st.subheader("Yard Area Summary")
   areas = {}
-  for r in roads:
-    yard = r["yard"]
+  for r in st.session_state.roads:
+    yard = r.get("yard", "Unknown")
     if yard not in areas:
-      if "Occupied" in str(r.get("status", "")):
-        areas[yard]["occupied"] += 1
+        areas[yard] = {"occupied": 0, "total": 0}
     areas[yard]["total"] += 1
-  area_df = pd.DataFrame([
-    {"Yard": k, "Occupied": v["occupied"], "Total Roads": v["total"]}
-    for k, v in areas.items()
-  ])
-  st.dataframe(area_df, hide_index=True, use_container_width=True)
+    if "Occupied" in str(r.get("status", "")):
+      areas[yard]["occupied"] +=1
+
+  if areas:
+    area_df = pd.DataFrame([
+      {"Yard": k, "Occupied": v["occupied"], "Total Roads": v["total"]}
+      for k, v in areas.items()
+    ])
+    st.dataframe(area_df, hide_index=True, use_container_width=True)
+  else:
+    st.info("No yard data")
 
   # Train type summary
   st.subheader("Train Type Summary")
