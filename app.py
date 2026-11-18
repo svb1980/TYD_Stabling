@@ -212,7 +212,7 @@ for r in st.session_state.roads:
               st.rerun()
 
 elif action == "Remove / Depart Train":
-    st.subheader("Remove or Depart a Train")
+  st.subheader("Remove or Depart a Train")
     
     occupied = [
         r for r in st.session_state.roads 
