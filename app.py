@@ -189,7 +189,7 @@ for r in st.session_state.roads:
       chosen = st.selectbox("Allocate to", road_options)
       if st.button("Confirm allocation", type="primary"):
           road_name = chosen.split(" — ")[1].split(" (")[0]
-            for road in st.session_state.roads:
+          for road in st.session_state.roads:
               if road["road"] == road_name:
                 road.update({
                   "status": "Occupied",
