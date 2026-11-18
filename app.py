@@ -212,12 +212,12 @@ for r in st.session_state.roads:
               st.rerun()
 
 elif action == "Remove / Depart Train":
-    st.subheader("Remove or Depart a Train")
+  st.subheader("Remove or Depart a Train")
     
-    occupied = [
-        r for r in st.session_state.roads 
-        if "Occupied" in str(r.get("status", "")) and r.get("train")
-    ]
+  occupied = [
+    r for r in st.session_state.roads 
+    if "Occupied" in str(r.get("status", "")) and r.get("train")
+  ]
     
     if not occupied:
         st.info("No trains currently stabled")
