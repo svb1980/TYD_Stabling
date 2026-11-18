@@ -146,6 +146,10 @@ if action == "Stable Train":
         "arrival": arrival_str,
         "departure": departure_str
       }
+
+st.write("Debug - all statuses:")
+st.write([r.get("status") for r in st.session_state.roads])
+st.write(f"Train length entered: {length}")
       suitable = [
         r for r in st.session_state.roads 
         if "Empty" in str(r.get("status", ""))
