@@ -159,52 +159,35 @@ if action == "Stable Train":
             if remaining >= length:
                 suitable.append(r)
 
-  if road["road"] == road_name:
-      new_length = (road.get("length", 0) or 0) + pending["length"]
-  
-      new_status = "Occupied"
-      road.update({
-        "status": new_status,
-        "train": pending["train"] if "Empty" in str(road.get("status", "")) else f"{road.get('train', '')} + {pending['train']}",
-        "operator": pending["operator"],
-        "type": pending["type"],
-        "length": new_length,
-        "num_locos": (road.get("num_locos", 0) or 0) + pending["num_locos"],
-        "locomotives": f"{road.get('locomotives', '')} {pending['locomotives']}".strip(),
-        "wagons": (road.get("wagons", 0) or 0) + pending["wagons"],
-        "loaded": pending["loaded"],
-        "arrival": pending["arrival"],
-        "departure": pending["departure"]
-      })
-
-  if not suitable:
-      st.error("No suitable empty roads for this train length")
-  else:
-      road_options = [f"{r['yard']} — {r['road']} ({r['capacity']}m)" for r in suitable]
-      chosen = st.selectbox("Allocate to", road_options)
-      if st.button("Confirm allocation", type="primary"):
-          road_name = chosen.split(" — ")[1].split(" (")[0]
-          for road in st.session_state.roads:
-              if road["road"] == road_name:
-                  road.update({
-                      "status": "Occupied",
-                      "train": pending["train"],
-                      "operator": pending["operator"],
-                      "type": pending["type"],
-                      "length": pending["length"],
-                      "num_locos": pending["num_locos"],
-                      "locomotives": pending["locomotives"],
-                      "wagons": pending["wagons"],
-                      "loaded": pending["loaded"],
-                      "arrival": pending["arrival"],
-                      "departure": pending["departure"]
-                  })
-                  st.session_state.movements.append(
-                      f"{datetime.now():%Y-%m-%d %H:%M} — ALLOCATED {pending['train']} TO {road_name}"
-                  )
-                  st.session_state.action_message = f"Train {pending['train']} allocated to {road_name}"
-                  del st.session_state.pending_train
-                  st.rerun()
+        if not suitable:
+            st.error("No suitable empty roads for this train length")
+        else:
+            road_options = [f"{r['yard']} — {r['road']} ({r['capacity']}m)" for r in suitable]
+            chosen = st.selectbox("Allocate to", road_options)
+            if st.button("Confirm allocation", type="primary"):
+                road_name = chosen.split(" — ")[1].split(" (")[0]
+                for road in st.session_state.roads:
+                    if road["road"] == road_name:
+                        new_length = (road.get("length", 0) or 0) + pending["length"]
+                        road.update({
+                            "status": "Occupied",
+                            "train": pending["train"] if "Empty" in str(road.get("status", "")) else f"{road.get('train', '')} + {pending['train']}",
+                            "operator": pending["operator"],
+                            "type": pending["type"],
+                            "length": new_length,
+                            "num_locos": (road.get("num_locos", 0) or 0) + pending["num_locos"],
+                            "locomotives": f"{road.get('locomotives', '')} {pending['locomotives']}".strip(),
+                            "wagons": (road.get("wagons", 0) or 0) + pending["wagons"],
+                            "loaded": pending["loaded"],
+                            "arrival": pending["arrival"],
+                            "departure": pending["departure"]
+                        })
+                        st.session_state.movements.append(
+                            f"{datetime.now():%Y-%m-%d %H:%M} — ALLOCATED {pending['train']} TO {road_name}"
+                        )
+                        st.session_state.action_message = f"Train {pending['train']} allocated to {road_name}"
+                        del st.session_state.pending_train
+                        st.rerun()  
 
 elif action == "Remove / Depart Train":
   st.subheader("Remove or Depart a Train")
