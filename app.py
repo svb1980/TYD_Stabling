@@ -163,7 +163,7 @@ if action == "Stable Train":
             st.error("No suitable empty roads for this train length")
         else:
             road_options = [f"{r['yard']} — {r['road']} ({r['capacity']}m)" for r in suitable]
-            chosen = st.selectbox("Allocate to", road_options)
+            chosen = st.selectbox("Stable in", road_options)
             if st.button("Confirm allocation", type="primary"):
                 road_name = chosen.split(" — ")[1].split(" (")[0]
                 for road in st.session_state.roads:
@@ -227,8 +227,7 @@ elif action == "Remove / Depart Train":
         
 elif action == "Reserve Road":
     st.subheader("Reserve a Road")
-    
-    # Show confirmation if we just reserved something
+
     if "reserve_message" in st.session_state:
         st.success(st.session_state.reserve_message)
         del st.session_state.reserve_message
