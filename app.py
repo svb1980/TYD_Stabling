@@ -148,7 +148,7 @@ if action == "Stable Train":
       }
 
   st.write("### Debug filter")
-  r for r in st.session_state.roads:
+  for r in st.session_state.roads:
     status_ok = "Empty" in str(r.get("status", ""))
     cap = r.get("capacity", 0)
     cap_ok = cap >= length
