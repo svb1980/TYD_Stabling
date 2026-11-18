@@ -398,8 +398,8 @@ elif action == "Maintenance Lock":
                         )
                         st.session_state.action_message = f"Lock removed from {road_name_to_unlock}"
                         st.rerun()
-            else:
-              st.info("No roads currently locked")
+  else:
+    st.info("No roads currently locked")
   
   st.divider()
   st.subheader("Book Out a Road")
